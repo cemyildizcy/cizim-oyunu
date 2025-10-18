@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Yol Çizme Oyunu — Oyun</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="page">
+		<header class="game-header">
+			<div class="info">
+				<div style="display:flex;gap:8px;align-items:center">
+					<h2 id="gameTitle" style="margin:0">Yol Çizme</h2>
+					<span id="gridSizeDisplay" style="color:var(--muted);font-size:13px"></span>
+				</div>
+				<div id="status" class="status">Yükleniyor...</div>
+			</div>
+			<div id="scoreboard" class="scoreboard card hidden">
+				<div id="p1Score">Oyuncu 1: 0</div>
+				<div id="p2Score">Oyuncu 2: 0</div>
+			</div>
+			<div class="controls">
+				<button class="small-btn" id="backBtn" onclick="location.href='index.html'">Geri</button>
+				<button class="small-btn" id="resetGameBtn">Yeniden Başlat</button>
+			</div>
+		</header>
+
+		<div class="canvas-wrap card">
+			<canvas id="gameCanvas"></canvas>
+		</div>
+
+		<footer class="footer">Kullanıcı1 (mavi) vs Kullanıcı2 (kırmızı)</footer>
+	</div>
+
+	<!-- Oyun Sonu Modalı -->
+	<div id="gameOverModal" class="modal-overlay hidden">
+		<div class="modal-content">
+			<h2 id="gameOverMessage"></h2>
+			<div class="modal-buttons">
+				<button id="playAgainBtn" class="btn primary">Tekrar Oyna</button>
+				<button id="exitBtn" class="btn ghost">Çıkış</button>
+				<button id="closeModalBtn" class="btn ghost">Kapat</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Kurallar Modalı -->
+	<div id="rulesModal" class="modal-overlay hidden">
+		<div class="modal-content">
+			<h2 id="rulesTitle">Oyun Kuralları</h2>
+			<div id="rulesContent" class="rules-text">
+				<!-- Kurallar buraya JS ile yüklenecek -->
+			</div>
+			<div class="modal-buttons" style="margin-top: 20px;">
+				<button id="closeRulesBtn" class="btn primary">Anladım</button>
+			</div>
+		</div>
+	</div>
+
+	<script src="game.js"></script>
+</body>
+</html>

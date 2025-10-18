@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Yol Çizme Oyunu — Başlangıç</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="page">
+		<header class="brand">
+			<h1>Yol Çizme Oyunu</h1>
+			<p class="subtitle">İki oyunculu zeka oyunu — önce ızgara boyutunu seçin</p>
+		</header>
+
+		<main class="card center-card">
+			<label for="gridSizeInput" class="label">Kare Sayısı (NxN)</label>
+			<input id="gridSizeInput" type="number" min="3" max="20" value="5" class="input">
+			
+			<label class="label" style="margin-top: 10px;">Oyun Türü</label>
+			<div class="game-mode-selector">
+				<button id="typePath" class="mode-btn active">Yol Çizme</button>
+				<button id="typeSquare" class="mode-btn">Kare Kapatma</button>
+			</div>
+
+			<label class="label" style="margin-top: 10px;">Oyuncu Modu</label>
+			<div class="game-mode-selector">
+				<button id="modeSingle" class="mode-btn active">Tek Kişilik</button>
+				<button id="modeMulti" class="mode-btn">İki Kişilik</button>
+			</div>
+
+			<div class="player-inputs">
+				<input id="player1Name" type="text" placeholder="Kullanıcı 1 Adı" value="Oyuncu 1" class="input">
+				<input id="player2Name" type="text" placeholder="Kullanıcı 2 Adı" value="Bilgisayar" class="input" disabled>
+			</div>
+
+			<div class="row">
+				<button id="startGameBtn" class="btn primary">Oyunu Başlat</button>
+			</div>
+			<small class="hint">Oyun alanındaki kare sayısını belirtir (3-20).</small>
+		</main>
+
+		<footer class="footer">©Cem YILDIZ tarafından yapılmıştır.</footer>
+	</div>
+
+	<script>
+		const modeSingleBtn = document.getElementById('modeSingle');
+		const modeMultiBtn = document.getElementById('modeMulti');
+		const typePathBtn = document.getElementById('typePath');
+		const typeSquareBtn = document.getElementById('typeSquare');
+		const player2NameInput = document.getElementById('player2Name');
+		let isSinglePlayer = true;
+
+		modeSingleBtn.addEventListener('click', () => {
+			isSinglePlayer = true;
+			modeSingleBtn.classList.add('active');
+			modeMultiBtn.classList.remove('active');
+			player2NameInput.value = 'Bilgisayar';
+			player2NameInput.disabled = true;
+		});
+
+		modeMultiBtn.addEventListener('click', () => {
+			isSinglePlayer = false;
+			modeMultiBtn.classList.add('active');
+			modeSingleBtn.classList.remove('active');
+			player2NameInput.value = 'Oyuncu 2';
+			player2NameInput.disabled = false;
+		});
+
+		typePathBtn.addEventListener('click', () => {
+			typePathBtn.classList.add('active');
+			typeSquareBtn.classList.remove('active');
+		});
+
+		typeSquareBtn.addEventListener('click', () => {
+			typeSquareBtn.classList.add('active');
+			typePathBtn.classList.remove('active');
+		});
+
+		document.getElementById('startGameBtn').addEventListener('click', () => {
+			const input = document.getElementById('gridSizeInput');
+			let v = parseInt(input.value) || 5;
+			
+			if (v < 3 || v > 20) {
+				alert('Lütfen 3 ile 20 arasında bir ızgara boyutu seçin.');
+				v = Math.min(Math.max(v, 3), 20);
+				input.value = v;
+				return; // Oyunu başlatma, kullanıcının tekrar denemesini bekle
+			}
+
+			const p1 = document.getElementById('player1Name').value || 'Oyuncu 1';
+			const p2 = document.getElementById('player2Name').value || 'Oyuncu 2';
+			const mode = isSinglePlayer ? 'single' : 'multi';
+			const gameType = typeSquareBtn.classList.contains('active') ? 'square' : 'path';
+
+			window.location.href = `game.html?size=${v}&p1=${encodeURIComponent(p1)}&p2=${encodeURIComponent(p2)}&mode=${mode}&type=${gameType}`;
+		});
+	</script>
+</body>
+</html>
