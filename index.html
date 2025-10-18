@@ -23,49 +23,30 @@
 				<button id="typeSquare" class="mode-btn">Kare Kapatma</button>
 			</div>
 
-			<label class="label" style="margin-top: 10px;">Oyuncu Modu</label>
-			<div class="game-mode-selector">
-				<button id="modeSingle" class="mode-btn active">Tek Kişilik</button>
-				<button id="modeMulti" class="mode-btn">İki Kişilik</button>
+            <!-- Oyuncu Modu kaldırıldı, çünkü online modda her zaman iki kişilik olacak -->
+			<div id="player-inputs" class="player-inputs" style="margin-top: 20px;">
+				<input id="playerName" type="text" placeholder="Oyuncu Adınız" value="Oyuncu 1" class="input">
 			</div>
 
-			<div class="player-inputs">
-				<input id="player1Name" type="text" placeholder="Kullanıcı 1 Adı" value="Oyuncu 1" class="input">
-				<input id="player2Name" type="text" placeholder="Kullanıcı 2 Adı" value="Bilgisayar" class="input" disabled>
+			<div class="online-section" style="margin-top: 20px;">
+				<label class="label">Çevrimiçi Oyun</label>
+				<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;justify-content:center">
+					<input id="roomInput" type="text" placeholder="Oda Kodu Girin (veya boş bırakın)" class="input" style="width:100%;padding:8px" />
+				</div>
 			</div>
 
 			<div class="row">
-				<button id="startGameBtn" class="btn primary">Oyunu Başlat</button>
+				<button id="startGameBtn" class="btn primary">Oda Oluştur / Katıl</button>
 			</div>
-			<small class="hint">Oyun alanındaki kare sayısını belirtir (3-20).</small>
+			<small class="hint">Arkadaşınla oynamak için aynı Oda Kodunu gir.</small>
 		</main>
 
 		<footer class="footer">©Cem YILDIZ tarafından yapılmıştır.</footer>
 	</div>
 
 	<script>
-		const modeSingleBtn = document.getElementById('modeSingle');
-		const modeMultiBtn = document.getElementById('modeMulti');
 		const typePathBtn = document.getElementById('typePath');
 		const typeSquareBtn = document.getElementById('typeSquare');
-		const player2NameInput = document.getElementById('player2Name');
-		let isSinglePlayer = true;
-
-		modeSingleBtn.addEventListener('click', () => {
-			isSinglePlayer = true;
-			modeSingleBtn.classList.add('active');
-			modeMultiBtn.classList.remove('active');
-			player2NameInput.value = 'Bilgisayar';
-			player2NameInput.disabled = true;
-		});
-
-		modeMultiBtn.addEventListener('click', () => {
-			isSinglePlayer = false;
-			modeMultiBtn.classList.add('active');
-			modeSingleBtn.classList.remove('active');
-			player2NameInput.value = 'Oyuncu 2';
-			player2NameInput.disabled = false;
-		});
 
 		typePathBtn.addEventListener('click', () => {
 			typePathBtn.classList.add('active');
@@ -85,15 +66,21 @@
 				alert('Lütfen 3 ile 20 arasında bir ızgara boyutu seçin.');
 				v = Math.min(Math.max(v, 3), 20);
 				input.value = v;
-				return; // Oyunu başlatma, kullanıcının tekrar denemesini bekle
+				return;
 			}
 
-			const p1 = document.getElementById('player1Name').value || 'Oyuncu 1';
-			const p2 = document.getElementById('player2Name').value || 'Oyuncu 2';
-			const mode = isSinglePlayer ? 'single' : 'multi';
+			const p1 = document.getElementById('playerName').value || 'Oyuncu 1';
 			const gameType = typeSquareBtn.classList.contains('active') ? 'square' : 'path';
+			
+			// Oda kodu al veya oluştur
+			let room = (document.getElementById('roomInput').value || '').trim();
+			if (!room) {
+				// Boş bırakılırsa 6 haneli rastgele bir kod oluştur
+				room = Math.random().toString(36).slice(2, 8).toUpperCase();
+			}
 
-			window.location.href = `game.html?size=${v}&p1=${encodeURIComponent(p1)}&p2=${encodeURIComponent(p2)}&mode=${mode}&type=${gameType}`;
+			// Oyuncuyu oyun sayfasına yönlendir
+			window.location.href = `game.html?size=${v}&p1=${encodeURIComponent(p1)}&type=${gameType}&room=${room}`;
 		});
 	</script>
 </body>

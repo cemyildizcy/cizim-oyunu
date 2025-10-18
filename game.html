@@ -30,7 +30,7 @@
 			<canvas id="gameCanvas"></canvas>
 		</div>
 
-		<footer class="footer">Kullanıcı1 (mavi) vs Kullanıcı2 (kırmızı)</footer>
+		<footer id="footerInfo" class="footer">Oda Kodu: Yükleniyor...</footer>
 	</div>
 
 	<!-- Oyun Sonu Modalı -->
@@ -50,13 +50,40 @@
 		<div class="modal-content">
 			<h2 id="rulesTitle">Oyun Kuralları</h2>
 			<div id="rulesContent" class="rules-text">
-				<!-- Kurallar buraya JS ile yüklenecek -->
 			</div>
 			<div class="modal-buttons" style="margin-top: 20px;">
 				<button id="closeRulesBtn" class="btn primary">Anladım</button>
 			</div>
 		</div>
 	</div>
+
+    <!-- ===== FIREBASE KODLARI ===== -->
+    <!-- Bu script'ler game.js'den ÖNCE gelmeli -->
+	<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+	<script>
+	  // Senin Firebase projenin sana özel yapılandırma kodu
+	  const firebaseConfig = {
+		apiKey: "AIzaSyCbCrS4ku7_E5qEUqAbFGLjDq3tyD9Tdnw",
+		authDomain: "cizgisavaslari-98312.firebaseapp.com",
+        // ÖNEMLİ: databaseURL'yi kendi Firebase projenizden alıp buraya yapıştırmalısınız.
+        // Genellikle şuna benzer: "https://<proje-id>-default-rtdb.firebaseio.com"
+		databaseURL: "https://cizgisavaslari-98312-default-rtdb.firebaseio.com",
+		projectId: "cizgisavaslari-98312",
+		storageBucket: "cizgisavaslari-98312.appspot.com",
+		messagingSenderId: "236401267419",
+		appId: "1:236401267419:web:1e2f9efaba97ad08b532fe"
+	  };
+
+	  // Firebase'i başlat
+	  firebase.initializeApp(firebaseConfig);
+
+	  // Veritabanını kullanıma hazır hale getir
+	  // Bu 'database' değişkeni artık game.js içinden erişilebilir olacak
+	  const database = firebase.database();
+	</script>
+    <!-- ============================= -->
 
 	<script src="game.js"></script>
 </body>
