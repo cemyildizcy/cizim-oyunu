@@ -116,7 +116,7 @@ function updateLocalStateFromServer() {
     // Eğer N değeri sunucudan gelenle farklıysa, güncelle ve tuvali yeniden boyutlandır
     if (N !== serverN) {
         N = serverN;
-        resizeCanvasAndSetStep(); // DÜZELTME: N değiştiğinde tuvali yeniden boyutlandır
+        resizeCanvasAndSetStep(); 
     }
 
     gameType = gameState.gameType || gameType;
@@ -166,7 +166,6 @@ function resetGame() {
     
 	gameRef.update(initialGameState);
     
-    // Kuralları göster
     displayRules();
 }
 
@@ -254,9 +253,7 @@ function displayRules() {
 
 // --- Tüm Çizim Fonksiyonları ---
 function draw() {
-    // DÜZELTME: gameState.edgesList gibi özellikler henüz gelmemiş olabileceğinden daha güvenli kontrol yap.
     if (!canvas || !gameState || typeof gameState.edgesList === 'undefined') {
-        // Henüz veri gelmediyse boş bir ızgara çiz
         const dpr = window.devicePixelRatio || 1;
         const physicalWidth = canvas.width / dpr;
         ctx.clearRect(0, 0, physicalWidth, physicalWidth);
@@ -342,7 +339,6 @@ function draw() {
 
 // Tuvale tıklandığında tetiklenir
 function handleClick(evt) {
-    // Gerekli kontroller
 	if (gameState.gameOver) return;
 	if (Object.keys(gameState.players || {}).length < 2) {
         alert("Rakibin bağlanmasını bekleyin.");
@@ -358,7 +354,6 @@ function handleClick(evt) {
 	const edge = findClickedEdge(mx, my);
 	if (!edge) return;
     
-    // Hamlenin geçerliliğini kontrol et ve sunucuya gönder
 	processMove(edge.a, edge.b);
 }
 
@@ -367,20 +362,17 @@ function processMove(a, b) {
     let newState = JSON.parse(JSON.stringify(gameState));
     const edgeKey = keyForEdge(a, b);
 
-    // Kenar zaten çizilmiş mi kontrol et
     const edgeExists = newState.edgesList.some(e => keyForEdge(e.a, e.b) === edgeKey);
     if (edgeExists) {
         return;
     }
 
-    // -- Oyun türüne göre mantığı ayır --
     if (gameType === 'square') {
         newState = processSquareMove(newState, a, b);
     } else {
         newState = processPathMove(newState, a, b);
     }
 
-    // Yeni durumu sunucuya gönder
     gameRef.update(newState);
 }
 
@@ -411,43 +403,66 @@ function processPathMove(state, a, b) {
         visitedPoints.add(keyForPoint(e.b));
     });
 
+    // Kural 1: İlk hamle serbest
     if (state.edgesList.length === 0) {
         state.edgesList.push({ a, b, player: state.turn });
-        state.turn = 2;
+        state.turn = 2; // Sıra diğer oyuncuya geçer
         return state;
     }
     
+    // Kural 2: İkinci hamle ilk çizgiye bağlanmalı
     if (state.edgesList.length === 1) {
         const firstEdge = state.edgesList[0];
-		let shared = null, other = null;
-        if (pointEquals(a, firstEdge.a)) { shared = a; other = b; }
-		else if (pointEquals(b, firstEdge.a)) { shared = b; other = a; }
-		else if (pointEquals(a, firstEdge.b)) { shared = a; other = b; }
-		else if (pointEquals(b, firstEdge.b)) { shared = b; other = a; }
-        else { alert('İkinci hamle ilk çizgiye bağlı olmalıdır.'); return state; }
+		let sharedPoint = null, newEndpoint = null;
+        if (pointEquals(a, firstEdge.a)) { sharedPoint = a; newEndpoint = b; }
+		else if (pointEquals(b, firstEdge.a)) { sharedPoint = b; newEndpoint = a; }
+		else if (pointEquals(a, firstEdge.b)) { sharedPoint = a; newEndpoint = b; }
+		else if (pointEquals(b, firstEdge.b)) { sharedPoint = b; newEndpoint = a; }
+        else { 
+            alert('İkinci hamle ilk çizgiye bağlı olmalıdır.'); 
+            return state; // Geçersiz hamle, durumu değiştirme
+        }
 
-        if (isBorderPoint(other) || visitedPoints.has(keyForPoint(other))) {
+        // Kural 3: Kenara veya ziyaret edilmiş noktaya gidemez
+        if (isBorderPoint(newEndpoint) || visitedPoints.has(keyForPoint(newEndpoint))) {
             state.gameOver = true;
             state.losingPlayer = state.turn;
         }
         state.edgesList.push({ a, b, player: state.turn });
-        state.activeEndpoint = other;
-        state.turn = 1;
+        state.activeEndpoint = newEndpoint;
+        state.turn = 1; // Sıra ilk oyuncuya döner
+        
+        // Rakibin hamlesi kalmış mı kontrol et
+        if(!state.gameOver && getValidPathMoves(state).length === 0) {
+            state.gameOver = true;
+            state.losingPlayer = state.turn;
+        }
         return state;
     }
 
-	let shared = null, other = null;
-	if (pointEquals(a, state.activeEndpoint)) { shared = a; other = b; }
-	else if (pointEquals(b, state.activeEndpoint)) { shared = b; other = a; }
-    else { alert('Sadece aktif uçtan devam edilebilir.'); return state; }
+    // Kural 4: Sonraki hamleler aktif uca bağlanmalı
+	let newEndpoint = null;
+	if (pointEquals(a, state.activeEndpoint)) { newEndpoint = b; }
+	else if (pointEquals(b, state.activeEndpoint)) { newEndpoint = a; }
+    else { 
+        alert('Sadece aktif uçtan devam edilebilir.'); 
+        return state; // Geçersiz hamle
+    }
 
-    if (isBorderPoint(other) || visitedPoints.has(keyForPoint(other))) {
+    // Kural 3 (tekrar): Kenara veya ziyaret edilmiş noktaya gidemez
+    if (isBorderPoint(newEndpoint) || visitedPoints.has(keyForPoint(newEndpoint))) {
         state.gameOver = true;
         state.losingPlayer = state.turn;
     }
     state.edgesList.push({ a, b, player: state.turn });
-    state.activeEndpoint = other;
-    state.turn = state.turn === 1 ? 2 : 1;
+    state.activeEndpoint = newEndpoint;
+    state.turn = state.turn === 1 ? 2 : 1; // Sırayı değiştir
+
+    // Kural 5: Rakibin hamlesi kalmış mı kontrol et
+    if(!state.gameOver && getValidPathMoves(state).length === 0) {
+        state.gameOver = true;
+        state.losingPlayer = state.turn; // Sıradaki oyuncu hamle yapamayacağı için kaybeder
+    }
     return state;
 }
 
@@ -474,6 +489,37 @@ function checkCompletedSquares(state, a, b) {
 // =================================================================
 // YARDIMCI FONKSİYONLAR
 // =================================================================
+
+function getValidPathMoves(state) {
+    if (state.edgesList.length < 1 || !state.activeEndpoint) return []; 
+    
+    const p = state.activeEndpoint;
+    const validMoves = [];
+    const neighbors = [
+        {x: p.x + 1, y: p.y}, {x: p.x - 1, y: p.y},
+        {x: p.x, y: p.y + 1}, {x: p.x, y: p.y - 1}
+    ];
+
+    const visitedPoints = new Set();
+    state.edgesList.forEach(e => {
+        visitedPoints.add(keyForPoint(e.a));
+        visitedPoints.add(keyForPoint(e.b));
+    });
+
+    const edgesSet = new Set(state.edgesList.map(e => keyForEdge(e.a, e.b)));
+
+    for (const n of neighbors) {
+        // Izgara sınırları içinde mi?
+        if (n.x >= 0 && n.x <= state.N && n.y >= 0 && n.y <= state.N) {
+             const edgeExists = edgesSet.has(keyForEdge(p, n));
+             // Kenar daha önce çizilmemiş, bitiş noktası kenarda değil ve daha önce ziyaret edilmemişse geçerlidir.
+             if (!edgeExists && !isBorderPoint(n) && !visitedPoints.has(keyForPoint(n))) {
+                 validMoves.push({a: p, b: n});
+             }
+        }
+    }
+    return validMoves;
+}
 
 function keyForEdge(a, b) {
 	const s1 = `${a.x},${a.y}`;
