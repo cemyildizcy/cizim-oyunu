@@ -253,12 +253,12 @@ function displayRules() {
 
 // --- Tüm Çizim Fonksiyonları ---
 function draw() {
-    if (!canvas || !gameState.edgesList) return;
+    if (!canvas) return;
 	const dpr = window.devicePixelRatio || 1;
 	const physicalWidth = canvas.width / dpr;
 	ctx.clearRect(0, 0, physicalWidth, physicalWidth);
 	
-	// Izgarayı çiz
+	// Izgarayı çiz (her durumda)
 	ctx.strokeStyle = '#e6eef6';
 	ctx.lineWidth = 1;
 	for (let i = 0; i <= N; i++) {
@@ -280,12 +280,18 @@ function draw() {
 		}
 	}
 
-    // Ele geçirilen kareleri çiz
-	if (gameType === 'square' && gameState.squares) {
+	// Güvenli erişim: server tarafı henüz gelmemiş olabilir -> varsayılan boş diziler kullan
+	const edgesListLocal = (gameState && Array.isArray(gameState.edgesList)) ? gameState.edgesList : [];
+	const squaresLocal = (gameState && Array.isArray(gameState.squares)) ? gameState.squares : Array(N).fill(0).map(()=>Array(N).fill(0));
+	const activeEP = (gameState && gameState.activeEndpoint) ? gameState.activeEndpoint : null;
+	const gameOverLocal = (gameState && gameState.gameOver) ? gameState.gameOver : false;
+
+	// Ele geçirilen kareleri çiz
+	if (gameType === 'square' && squaresLocal) {
 		for (let y = 0; y < N; y++) {
 			for (let x = 0; x < N; x++) {
-				if (gameState.squares[y][x] !== 0) {
-					ctx.fillStyle = gameState.squares[y][x] === 1 ? 'rgba(79, 70, 229, 0.3)' : 'rgba(239, 68, 68, 0.3)';
+				if (squaresLocal[y][x] !== 0) {
+					ctx.fillStyle = squaresLocal[y][x] === 1 ? 'rgba(79, 70, 229, 0.3)' : 'rgba(239, 68, 68, 0.3)';
 					ctx.fillRect(x * step, y * step, step, step);
 				}
 			}
@@ -293,10 +299,9 @@ function draw() {
 	}
 
 	// Çizgileri çiz
-	for (let i = 0; i < gameState.edgesList.length; i++) {
-		const e = gameState.edgesList[i];
-		const isLastMove = i === gameState.edgesList.length - 1 && !gameState.gameOver;
-		
+	for (let i = 0; i < edgesListLocal.length; i++) {
+		const e = edgesListLocal[i];
+		const isLastMove = i === edgesListLocal.length - 1 && !gameOverLocal;
 		ctx.beginPath();
 		ctx.strokeStyle = e.player === 1 ? '#4f46e5' : '#ef4444';
 		ctx.lineWidth = isLastMove ? 7 : 5;
@@ -305,11 +310,11 @@ function draw() {
 		ctx.stroke();
 	}
 
-    // Aktif ucu çiz (Yol Çizme oyunu için)
-	if (gameState.activeEndpoint && !gameState.gameOver && gameType === 'path') {
+	// Aktif ucu çiz (Yol Çizme oyunu için)
+	if (activeEP && !gameOverLocal && gameType === 'path') {
 		ctx.beginPath();
 		ctx.fillStyle = '#16a34a';
-		ctx.arc(gameState.activeEndpoint.x * step, gameState.activeEndpoint.y * step, 6, 0, Math.PI * 2);
+		ctx.arc(activeEP.x * step, activeEP.y * step, 6, 0, Math.PI * 2);
 		ctx.fill();
 	}
 }
