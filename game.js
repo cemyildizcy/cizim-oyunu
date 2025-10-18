@@ -56,7 +56,7 @@ let timeLeft = 3;
 	}
     // Bug 2: Update game title
     if (gameTitle) {
-        gameTitle.textContent = gameType === 'square' ? 'Kare Kapatma' : 'Yol Çizme';
+        gameTitle.textContent = `${gameType === 'square' ? 'Kare Kapatma' : 'Yol Çizme'} — Çizgi Savaşları`;
     }
 })();
 
