@@ -108,6 +108,13 @@ function setupFirebaseConnection() {
 
 // Sunucudan gelen yeni verilerle yerel durumu günceller
 function updateLocalStateFromServer() {
+    // Odaya sonradan katılan oyuncu, odanın ayarlarını benimser
+    N = gameState.N || N;
+    gameType = gameState.gameType || gameType;
+    if (gridSizeDisplay) gridSizeDisplay.textContent = `${N} × ${N} Kare`;
+    if (gameTitle) gameTitle.textContent = `${gameType === 'square' ? 'Kare Kapatma' : 'Yol Çizme'}`;
+
+
 	// Skor tablosu görünürlüğü
 	if (gameType === 'square') {
 		scoreboard.classList.remove('hidden');
@@ -132,12 +139,11 @@ function updateLocalStateFromServer() {
 // Oyunu sıfırlar ve başlangıç durumunu Firebase'e yazar
 function resetGame() {
 	if (playerNumber !== 1) {
-		alert("Sadece 1. oyuncu oyunu yeniden başlatabilir.");
-		return;
+		return; // Sadece 1. oyuncu (kurucu) oyunu başlatabilir/sıfırlayabilir.
 	}
 
 	const initialGameState = {
-		status: 'waiting_for_players',
+		status: 'game_started', // Durumu 'oyun başladı' olarak değiştir
 		turn: 1,
 		edgesList: [],
 		squares: Array(N).fill(0).map(() => Array(N).fill(0)),
@@ -148,7 +154,10 @@ function resetGame() {
         N: N, // Izgara boyutu da kaydedilir
         gameType: gameType
 	};
-	gameRef.set(initialGameState);
+    
+    // DÜZELTME: .set() yerine .update() kullanılır.
+    // Bu, 'players' listesini silmeden sadece oyun verilerini günceller.
+	gameRef.update(initialGameState);
     
     // Kuralları göster
     displayRules();
@@ -166,11 +175,12 @@ function updateStatusText() {
     }
 
     const players = gameState.players || {};
-    const playerNames = Object.values(players).map(p => p.name);
+    const playerKeys = Object.keys(players);
+    const playerNames = playerKeys.map(key => players[key].name);
     const p1Name = playerNames[0] || 'Oyuncu 1';
     const p2Name = playerNames[1] || 'Oyuncu 2';
 
-    if(Object.keys(players).length < 2 && !gameState.gameOver) {
+    if(playerKeys.length < 2 && !gameState.gameOver) {
         statusDiv.textContent = 'Rakip bekleniyor...';
         return;
     }
@@ -192,7 +202,8 @@ function updateStatusText() {
 function updateScoreDisplay() {
 	if (gameType !== 'square') return;
     const players = gameState.players || {};
-    const playerNames = Object.values(players).map(p => p.name);
+    const playerKeys = Object.keys(players);
+    const playerNames = playerKeys.map(key => players[key].name);
     const p1Name = playerNames[0] || 'Oyuncu 1';
     const p2Name = playerNames[1] || 'Oyuncu 2';
 
@@ -202,7 +213,8 @@ function updateScoreDisplay() {
 
 function showGameOverScreen() {
     const players = gameState.players || {};
-    const playerNames = Object.values(players).map(p => p.name);
+    const playerKeys = Object.keys(players);
+    const playerNames = playerKeys.map(key => players[key].name);
     const p1Name = playerNames[0] || 'Oyuncu 1';
     const p2Name = playerNames[1] || 'Oyuncu 2';
     
@@ -310,7 +322,7 @@ function handleClick(evt) {
         return;
     }
 	if (playerNumber !== gameState.turn) {
-		alert("Sıra sizde değil.");
+		// alert("Sıra sizde değil."); // Sürekli uyarı vermemesi için bu satırı kaldırabiliriz
 		return;
 	}
 
@@ -332,7 +344,7 @@ function processMove(a, b) {
     // Kenar zaten çizilmiş mi kontrol et
     const edgeExists = newState.edgesList.some(e => keyForEdge(e.a, e.b) === edgeKey);
     if (edgeExists) {
-        alert('Bu kenar zaten çizilmiş.');
+        // alert('Bu kenar zaten çizilmiş.'); // Sırası olmayan oyuncu tıklarsa uyarı vermesin
         return;
     }
 
@@ -531,3 +543,4 @@ closeRulesBtn.addEventListener('click', () => { rulesModal.classList.add('hidden
 
 // İlk tuval boyutlandırmasını yap
 resizeCanvasAndSetStep();
+
