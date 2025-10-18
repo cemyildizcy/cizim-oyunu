@@ -61,6 +61,9 @@ let gameState = {}; // Sunucudaki tüm oyun verisini tutan obje
 		window.location.href = 'index.html';
 		return;
 	}
+    
+    // DÜZELTME: Firebase bağlantısı kurulmadan önce boş bir ızgara çizerek beyaz ekranı önle.
+    resizeCanvasAndSetStep();
 
 	// Firebase bağlantısını ve dinleyicilerini kur
 	setupFirebaseConnection();
@@ -161,8 +164,6 @@ function resetGame() {
         gameType: gameType
 	};
     
-    // DÜZELTME: .set() yerine .update() kullanılır.
-    // Bu, 'players' listesini silmeden sadece oyun verilerini günceller.
 	gameRef.update(initialGameState);
     
     // Kuralları göster
@@ -253,12 +254,32 @@ function displayRules() {
 
 // --- Tüm Çizim Fonksiyonları ---
 function draw() {
-    if (!canvas) return;
+    // DÜZELTME: gameState.edgesList gibi özellikler henüz gelmemiş olabileceğinden daha güvenli kontrol yap.
+    if (!canvas || !gameState || typeof gameState.edgesList === 'undefined') {
+        // Henüz veri gelmediyse boş bir ızgara çiz
+        const dpr = window.devicePixelRatio || 1;
+        const physicalWidth = canvas.width / dpr;
+        ctx.clearRect(0, 0, physicalWidth, physicalWidth);
+        ctx.strokeStyle = '#e6eef6';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= N; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, i * step);
+            ctx.lineTo(physicalWidth, i * step);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(i * step, 0);
+            ctx.lineTo(i * step, physicalWidth);
+            ctx.stroke();
+        }
+        return;
+    }
+
 	const dpr = window.devicePixelRatio || 1;
 	const physicalWidth = canvas.width / dpr;
 	ctx.clearRect(0, 0, physicalWidth, physicalWidth);
 	
-	// Izgarayı çiz (her durumda)
+	// Izgarayı çiz
 	ctx.strokeStyle = '#e6eef6';
 	ctx.lineWidth = 1;
 	for (let i = 0; i <= N; i++) {
@@ -280,18 +301,12 @@ function draw() {
 		}
 	}
 
-	// Güvenli erişim: server tarafı henüz gelmemiş olabilir -> varsayılan boş diziler kullan
-	const edgesListLocal = (gameState && Array.isArray(gameState.edgesList)) ? gameState.edgesList : [];
-	const squaresLocal = (gameState && Array.isArray(gameState.squares)) ? gameState.squares : Array(N).fill(0).map(()=>Array(N).fill(0));
-	const activeEP = (gameState && gameState.activeEndpoint) ? gameState.activeEndpoint : null;
-	const gameOverLocal = (gameState && gameState.gameOver) ? gameState.gameOver : false;
-
-	// Ele geçirilen kareleri çiz
-	if (gameType === 'square' && squaresLocal) {
+    // Ele geçirilen kareleri çiz
+	if (gameType === 'square' && gameState.squares) {
 		for (let y = 0; y < N; y++) {
 			for (let x = 0; x < N; x++) {
-				if (squaresLocal[y][x] !== 0) {
-					ctx.fillStyle = squaresLocal[y][x] === 1 ? 'rgba(79, 70, 229, 0.3)' : 'rgba(239, 68, 68, 0.3)';
+				if (gameState.squares[y][x] !== 0) {
+					ctx.fillStyle = gameState.squares[y][x] === 1 ? 'rgba(79, 70, 229, 0.3)' : 'rgba(239, 68, 68, 0.3)';
 					ctx.fillRect(x * step, y * step, step, step);
 				}
 			}
@@ -299,9 +314,10 @@ function draw() {
 	}
 
 	// Çizgileri çiz
-	for (let i = 0; i < edgesListLocal.length; i++) {
-		const e = edgesListLocal[i];
-		const isLastMove = i === edgesListLocal.length - 1 && !gameOverLocal;
+	for (let i = 0; i < gameState.edgesList.length; i++) {
+		const e = gameState.edgesList[i];
+		const isLastMove = i === gameState.edgesList.length - 1 && !gameState.gameOver;
+		
 		ctx.beginPath();
 		ctx.strokeStyle = e.player === 1 ? '#4f46e5' : '#ef4444';
 		ctx.lineWidth = isLastMove ? 7 : 5;
@@ -310,11 +326,11 @@ function draw() {
 		ctx.stroke();
 	}
 
-	// Aktif ucu çiz (Yol Çizme oyunu için)
-	if (activeEP && !gameOverLocal && gameType === 'path') {
+    // Aktif ucu çiz (Yol Çizme oyunu için)
+	if (gameState.activeEndpoint && !gameState.gameOver && gameType === 'path') {
 		ctx.beginPath();
 		ctx.fillStyle = '#16a34a';
-		ctx.arc(activeEP.x * step, activeEP.y * step, 6, 0, Math.PI * 2);
+		ctx.arc(gameState.activeEndpoint.x * step, gameState.activeEndpoint.y * step, 6, 0, Math.PI * 2);
 		ctx.fill();
 	}
 }
@@ -333,7 +349,6 @@ function handleClick(evt) {
         return;
     }
 	if (playerNumber !== gameState.turn) {
-		// alert("Sıra sizde değil."); // Sürekli uyarı vermemesi için bu satırı kaldırabiliriz
 		return;
 	}
 
@@ -349,13 +364,12 @@ function handleClick(evt) {
 
 // Bir hamleyi işler ve sonucu Firebase'e yazar
 function processMove(a, b) {
-    let newState = JSON.parse(JSON.stringify(gameState)); // Mevcut durumun derin bir kopyasını oluştur
+    let newState = JSON.parse(JSON.stringify(gameState));
     const edgeKey = keyForEdge(a, b);
 
     // Kenar zaten çizilmiş mi kontrol et
     const edgeExists = newState.edgesList.some(e => keyForEdge(e.a, e.b) === edgeKey);
     if (edgeExists) {
-        // alert('Bu kenar zaten çizilmiş.'); // Sırası olmayan oyuncu tıklarsa uyarı vermesin
         return;
     }
 
@@ -378,13 +392,10 @@ function processSquareMove(state, a, b) {
     if (completedCount > 0) {
         if (state.turn === 1) state.player1Score += completedCount;
         else state.player2Score += completedCount;
-        // Puan alan oyuncu tekrar oynar, sıra değişmez
     } else {
-        // Puan alamadıysa sıra değişir
         state.turn = state.turn === 1 ? 2 : 1;
     }
 
-    // Oyun bitti mi kontrolü
     const totalScore = state.player1Score + state.player2Score;
     if (totalScore === N * N) {
         state.gameOver = true;
@@ -400,14 +411,12 @@ function processPathMove(state, a, b) {
         visitedPoints.add(keyForPoint(e.b));
     });
 
-    // İlk hamle
     if (state.edgesList.length === 0) {
         state.edgesList.push({ a, b, player: state.turn });
         state.turn = 2;
         return state;
     }
     
-    // İkinci hamle
     if (state.edgesList.length === 1) {
         const firstEdge = state.edgesList[0];
 		let shared = null, other = null;
@@ -427,7 +436,6 @@ function processPathMove(state, a, b) {
         return state;
     }
 
-    // Sonraki hamleler
 	let shared = null, other = null;
 	if (pointEquals(a, state.activeEndpoint)) { shared = a; other = b; }
 	else if (pointEquals(b, state.activeEndpoint)) { shared = b; other = a; }
@@ -443,7 +451,6 @@ function processPathMove(state, a, b) {
     return state;
 }
 
-// Bir hamle sonrası tamamlanan kareleri kontrol eder ve state'i günceller
 function checkCompletedSquares(state, a, b) {
     let completedCount = 0;
     const check = (x, y) => {
@@ -453,10 +460,10 @@ function checkCompletedSquares(state, a, b) {
             completedCount++;
         }
     };
-    if (a.y === b.y) { // Yatay çizgi
+    if (a.y === b.y) {
         check(a.x, a.y - 1);
         check(a.x, a.y);
-    } else { // Dikey çizgi
+    } else {
         check(a.x - 1, a.y);
         check(a.x, a.y);
     }
@@ -489,7 +496,6 @@ function countSides(state, x, y) {
 }
 
 function findClickedEdge(mx, my) {
-	// ... (Bu fonksiyon aynı kalabilir, sadece en yakın kenarı bulur)
     let best = null;
 	let bestDist = Infinity;
     const threshold = Math.min(20, step * 0.4);
@@ -510,7 +516,6 @@ function findClickedEdge(mx, my) {
 }
 
 function distPointToSegment(px, py, x1, y1, x2, y2) {
-    // ... (Bu fonksiyon da aynı kalabilir)
     const A = px - x1, B = py - y1, C = x2 - x1, D = y2 - y1;
 	const dot = A * C + B * D;
 	const len_sq = C * C + D * D;
@@ -546,12 +551,15 @@ function resizeCanvasAndSetStep() {
 
 window.addEventListener('resize', resizeCanvasAndSetStep);
 canvas.addEventListener('click', handleClick);
-resetBtn.addEventListener('click', resetGame);
-playAgainBtn.addEventListener('click', resetGame);
+resetBtn.addEventListener('click', () => {
+    if(playerNumber === 1) resetGame();
+    else alert('Sadece 1. oyuncu oyunu sıfırlayabilir.');
+});
+playAgainBtn.addEventListener('click', () => {
+    if(playerNumber === 1) resetGame();
+    else alert('Sadece 1. oyuncu oyunu sıfırlayabilir.');
+});
 exitBtn.addEventListener('click', () => { window.location.href = 'index.html'; });
 closeModalBtn.addEventListener('click', () => { gameOverModal.classList.add('hidden'); });
 closeRulesBtn.addEventListener('click', () => { rulesModal.classList.add('hidden'); });
-
-// İlk tuval boyutlandırmasını yap
-resizeCanvasAndSetStep();
 
