@@ -36,6 +36,10 @@ let myPlayerRef = null; // Bu oyuncunun kendi referansı
 // --- Oyun Mekaniği Değişkenleri (Firebase'den senkronize edilecek) ---
 let gameState = {}; // Sunucudaki tüm oyun verisini tutan obje
 
+// Yeni: single-player ve AI flag'leri
+let isSinglePlayer = false;
+let aiThinking = false;
+
 // --- Yardımcı: gameState için varsayılanlar ---
 function ensureGameStateDefaults() {
 	if (!gameState || typeof gameState !== 'object') gameState = {};
@@ -66,6 +70,12 @@ function ensureGameStateDefaults() {
 	gameType = params.get('type') || gameType;
 	onlineRoom = params.get('room') || null;
 
+	// Yeni: mode param ('single' veya 'local'), default local
+	const mode = params.get('mode') || 'local';
+	// Eğer explicit mode yoksa p2 adı "bilgisayar" ise de single kabul et
+	const p2FromUrl = (params.get('p2') || '').toLowerCase();
+	isSinglePlayer = (mode === 'single') || p2FromUrl.includes('bilgisayar');
+
 	if (gridSizeDisplay) gridSizeDisplay.textContent = `${N} × ${N} Kare`;
 	if (footerInfo) footerInfo.textContent = onlineRoom ? `Oda Kodu: ${onlineRoom}` : '';
 
@@ -76,11 +86,17 @@ function ensureGameStateDefaults() {
 	// Her durumda ızgarayı hemen göster
 	resizeCanvasAndSetStep();
 
-	// Eğer onlineRoom varsa Firebase bağlantısını kur (online kodu dokunulmadan bırakıldı)
+	// Eğer kare kapatma modunda gelindiyse kuralları göster (kullanıcı görsün)
+	if (gameType === 'square') {
+		displayRules();
+	}
+
+	// Eğer onlineRoom varsa Firebase bağlantısını kur
 	if (onlineRoom && typeof database !== 'undefined' && database) {
 		setupFirebaseConnection();
 	} else {
 		// Offline fallback: oluşturulmuş local state ile bekle
+		const p2NameFromUrl = params.get('p2') || (isSinglePlayer ? 'Bilgisayar' : 'Oyuncu 2');
 		gameState = {
 			status: 'local',
 			turn: 1,
@@ -92,8 +108,13 @@ function ensureGameStateDefaults() {
 			gameOver: false,
 			N: N,
 			gameType: gameType,
-			players: { local: { name: myName } }
+			players: { p1: { name: myName }, p2: { name: p2NameFromUrl } }
 		};
+		// Local client davranışı:
+		// - Tek kişilik: bu istemci Oyuncu 1 (AI Oyuncu 2)
+		// - Aynı cihaz: her iki oyuncu aynı cihazdan tıklayabilir -> playerNumber null yap
+		// Local client is player 1
+		playerNumber = isSinglePlayer ? 1 : null;
 		ensureGameStateDefaults();
 		updateStatusText();
 		draw();
@@ -110,12 +131,18 @@ function setupFirebaseConnection() {
 	myPlayerRef.onDisconnect().remove();
 
 	playersRef.on('value', (snapshot) => {
-		const players = snapshot.val();
-		if (!players) return;
+		const players = snapshot.val() || {};
+		// Sunucudan gelen oyuncu listesini gameState'e koy ve UI'ı güncelle
+		gameState.players = players;
+		ensureGameStateDefaults();
+		// Belirle: bu istemcinin oyuncu sırası (1 veya 2)
 		const playerKeys = Object.keys(players);
-		const myKey = myPlayerRef.key;
-		const myIndex = playerKeys.findIndex(k => k === myKey);
+		const myKey = myPlayerRef && myPlayerRef.key;
+		const myIndex = myKey ? playerKeys.findIndex(k => k === myKey) : -1;
 		if (myIndex !== -1) playerNumber = myIndex + 1;
+		// Güncellenmiş oyuncu bilgisiyle UI ve çizimi yenile
+		updateLocalStateFromServer();
+		// Eğer oda sahibi (1) ise ve oyun başlamadıysa başlat
 		if (playerNumber === 1 && !gameState.status) resetGame();
 	});
 
@@ -143,12 +170,44 @@ function updateLocalStateFromServer() {
 
 	if (gameType === 'square') scoreboard.classList.remove('hidden'); else scoreboard.classList.add('hidden');
 
+	// Eğer serverdan gelen squares matrisi N ile uyumlu değilse yeniden boyutlandır
+	if (!Array.isArray(gameState.squares) || gameState.squares.length !== N) {
+		const newSquares = Array(N).fill(0).map(() => Array(N).fill(0));
+		if (Array.isArray(gameState.squares)) {
+			// var olan değerleri kopyala (sığ mümkünse)
+			for (let y = 0; y < Math.min(gameState.squares.length, N); y++) {
+				for (let x = 0; x < Math.min(gameState.squares[y].length || 0, N); x++) {
+					newSquares[y][x] = gameState.squares[y][x] || 0;
+				}
+			}
+		}
+		gameState.squares = newSquares;
+	}
+
 	updateStatusText();
 	updateScoreDisplay();
 	draw();
 
-	if (gameState.gameOver) showGameOverScreen();
-	else gameOverModal.classList.add('hidden');
+	// Zamanlayıcı yönetimi: eğer oyun bitti temizle
+	if (gameState.gameOver) {
+		clearTurnTimer();
+		showGameOverScreen();
+	} else {
+		// Eğer bu istemcinin sırasıysa ve ilk hamle yapılmışsa başlat
+		if (typeof playerNumber !== 'undefined' && playerNumber === gameState.turn) {
+			if (Array.isArray(gameState.edgesList) && gameState.edgesList.length > 0) startTurnTimer();
+			else clearTurnTimer();
+		} else {
+			clearTurnTimer();
+		}
+		// Yeni: eğer single-player moddaysak ve AI sırasıysa AI'yi planla (küçük gecikmeyle)
+		if (!onlineRoom && isSinglePlayer) {
+			setTimeout(() => {
+				if (gameState && gameState.turn === 2) scheduleAIMoveIfNeeded();
+			}, 60);
+		}
+		gameOverModal.classList.add('hidden');
+	}
 }
 
 // oyunu sıfırlar ve başlangıç durumunu Firebase'e yazar
@@ -178,16 +237,18 @@ function resetGame() {
 function updateStatusText() {
 	ensureGameStateDefaults();
 	const players = gameState.players || {};
-	const keys = Object.keys(players);
-	const names = keys.map(k => players[k].name);
-	const p1 = names[0] || 'Oyuncu 1';
-	const p2 = names[1] || 'Oyuncu 2';
 
+	// Tercihen p1/p2 anahtarlarını kullan, yoksa keys sırasına göre al
+	const p1Name = (players.p1 && players.p1.name) || (Object.keys(players)[0] && players[Object.keys(players)[0]] && players[Object.keys(players)[0]].name) || 'Oyuncu 1';
+	const p2Name = (players.p2 && players.p2.name) || (Object.keys(players)[1] && players[Object.keys(players)[1]] && players[Object.keys(players)[1]].name) || 'Oyuncu 2';
+
+	const keys = Object.keys(players);
 	if (keys.length < 2 && !gameState.gameOver) { statusDiv.textContent = 'Rakip bekleniyor...'; return; }
 	if (gameState.gameOver) { statusDiv.textContent = 'Oyun Bitti!'; return; }
-	const current = gameState.turn === 1 ? p1 : p2;
+	const current = gameState.turn === 1 ? p1Name : p2Name;
 	let text = `Sıra: ${current}`;
-	if (playerNumber === gameState.turn) text += ' (Sıra Sende)';
+	// Eğer local aynı cihaz modunda playerNumber null ise her iki oyuncuya izin ver => (Sıra Sende) sadece tek-kullanıcı modunda göster
+	if (playerNumber && playerNumber === gameState.turn) text += ' (Sıra Sende)';
 	statusDiv.textContent = text;
 }
 
@@ -201,6 +262,7 @@ function updateScoreDisplay() {
 
 function showGameOverScreen() {
 	ensureGameStateDefaults();
+	clearTurnTimer();
 	const players = gameState.players || {};
 	const names = Object.keys(players).map(k => players[k].name);
 	const p1 = names[0] || 'Oyuncu 1', p2 = names[1] || 'Oyuncu 2';
@@ -221,23 +283,79 @@ function showGameOverScreen() {
 }
 
 function displayRules() {
-	rulesModal.classList.remove('hidden');
-	if (gameType === 'path') {
-		rulesTitle.textContent = "Yol Çizme Oyunu Kuralları";
-		rulesContent.innerHTML = `<ul>
-<li>İlk hamle serbesttir.</li>
-<li>İkinci hamle ilk çizginin bir ucuna bağlı olmak zorundadır.</li>
-<li>Sonraki hamleler, aktif uçtan devam eder.</li>
-<li>Aktif uç sınır veya daha önce ziyaret edilmiş noktaya götürürse o oyuncu kaybeder.</li>
-</ul>`;
-	} else {
-		rulesTitle.textContent = "Kare Kapatma Oyunu Kuralları";
-		rulesContent.innerHTML = `<ul>
-<li>Amaç kareleri tamamlayarak puanları toplamaktır.</li>
-<li>Kare tamamlayan ayni oyuncu tekrar hamle yapar.</li>
-<li>Tüm kareler dolunca en yüksek puan kazanan olur.</li>
-</ul>`;
-	}
+    rulesModal.classList.remove('hidden');
+    if (gameType === 'path') {
+        rulesTitle.textContent = "Yol Çizme Oyunu Kuralları";
+        rulesContent.innerHTML = `<ul>
+            <li>İlk hamle serbesttir.</li>
+            <li>İkinci hamle ilk çizginin bir ucuna bağlı olmak zorundadır.</li>
+            <li>Sonraki hamleler, aktif uçtan devam eder.</li>
+            <li>Aktif uç sınır veya daha önce ziyaret edilmiş noktaya götürürse o oyuncu kaybeder.</li>
+        </ul>`;
+    } else if (gameType === 'square') {
+        rulesTitle.textContent = "Kare Kapatma — Kurallar (Detaylı)";
+        rulesContent.innerHTML = `
+            <div class="rules-text">
+                <h3>Genel</h3>
+                <ul>
+                    <li>Oyun N×N kare ızgarasında oynanır. Noktalar ızgara köşeleridir, kenarlar kare kenarlarıdır.</li>
+                    <li>Amaç: Kareleri tamamlayarak daha fazla puan toplamak.</li>
+                </ul>
+
+                <h3>Başlangıç</h3>
+                <ul>
+                    <li>Oyuncular sırayla bir boş kenar çizer. Odayı oluşturan (ilk oyuncu) genellikle oyunu başlatır.</li>
+                    <li>Her kare 4 kenardan oluşur; bir oyuncu son kenarı çizdiğinde o kareyi kazanır.</li>
+                </ul>
+
+                <h3>Hamle Kuralları</h3>
+                <ul>
+                    <li>Her hamlede bir kenar (iki nokta arasında) çizilir. Aynı kenarı ikinci kez çizmek geçersizdir.</li>
+                    <li>Bir hamle bir veya birden fazla kare tamamlayabilir. Tamamlanan her kare o oyuncunun puanına eklenir.</li>
+                    <li>Kare tamamlayan oyuncu hemen <strong>bir hamle daha</strong> yapar — yani sıra ona kalır.</li>
+                    <li>Eğer hamle hiç kare tamamlamıyorsa sıra diğer oyuncuya geçer.</li>
+                </ul>
+
+                <h3>Puanlama ve Oyun Sonu</h3>
+                <ul>
+                    <li>Her tamamlanan kare 1 puandır (çoklu kare tamamlanırsa her biri ayrı puandır).</li>
+                    <li>Tüm kareler kapatıldığında oyun biter. En çok puana sahip oyuncu kazanır.</li>
+                    <li>Eşit puan durumunda oyun beraberlikle sonuçlanır.</li>
+                </ul>
+
+                <h3>Geçersiz Hamle ve Zaman Aşımı</h3>
+                <ul>
+                    <li>Aynı kenarın yeniden çizilmesi geçersizdir ve reddedilir.</li>
+                    <li>Çevrimiçi oyunda süre limiti (örn. 5s) varsa süre dolduğunda sistem rastgele geçerli bir kenar çizebilir veya hamle yapan oyuncu için tanımlı davranışı (kaybetme ya da otomatik hamle) uygulayabilir.</li>
+                </ul>
+
+                <h3>Örnek</h3>
+                <pre style="color:var(--muted);background:transparent;padding:6px;border-radius:6px;">
+Nokta düzeni (küçük örnek, X işaretli kenar çizilmiş):
+•—•   •
+| X   |
+•   —•
+Bir oyuncu kalan kenarı çizerek kareyi tamamladığında o kare onun olur ve tekrar oynar.
+                </pre>
+
+                <h3>Strateji Notları</h3>
+                <ul>
+                    <li>Genel strateji: Rakibe "3 kenarlı kare" vermekten kaçının — 3 kenarı olan kare rakibin o kareyi tamamlamasını sağlar.</li>
+                    <li>Genellikle güvenli hamlelerle ilerleyin; rakibe çoklu kare verme riskini hesaplayın.</li>
+                    <li>Son aşamada birden fazla kareyi art arda almak mümkün olabilir; bu durumda toplu puan farkı yaratabilirsiniz.</li>
+                </ul>
+
+                <h3>Çevrimiçi Davranış</h3>
+                <ul>
+                    <li>Hamleler sunucuya gönderilir, sunucu doğrular ve tüm oyunculara yayınlar — bu, senkronizasyonu sağlar.</li>
+                    <li>Odayı oluşturan oyuncu oyuncu 1'dir; yalnızca oyuncu 1 oyunu sıfırlayabilir.</li>
+                    <li>Rakip ayrılırsa karşı tarafa bildirim gider; anlık senkronizasyon koparsa otomatik yeniden bağlanma veya odadan ayrılma mantığı uygulanır.</li>
+                </ul>
+
+                <p style="color:var(--muted);margin-top:8px">Kısaca: Her kareyi tamamlayan oyuncu puan alır ve ekstra hamle yapar; tüm kareler kapandığında en çok puan alan kazanır. Oyun süresince aynı kenarı yeniden çizemezsin ve strateji olarak "3 kenarlı kare" tuzaklarına dikkat etmelisin.</p>
+            </div>
+        `;
+    }
 }
 
 // --- Tüm Çizim Fonksiyonları ---
@@ -297,7 +415,7 @@ function handleClick(evt) {
 	ensureGameStateDefaults();
 	if (gameState.gameOver) return;
 	const playersCount = Object.keys(gameState.players || {}).length;
-	if (playersCount < 2 && gameState.status!=='local') { alert('Rakibin bağlanmasını bekleyin.'); return; }
+	if (playersCount < 2 && gameState.status!=='local') { alert('Rakipin bağlanmasını bekleyin.'); return; }
 	if (playerNumber && playerNumber !== gameState.turn) return;
 
 	const rect = canvas.getBoundingClientRect();
@@ -329,6 +447,12 @@ function processMove(a,b){
 	} else {
 		gameState = newState;
 		updateLocalStateFromServer();
+		// Eğer single-player ve AI sırası geldiyse ufak gecikmeyle planla (updateLocalStateFromServer bitmesini beklemek için)
+		if (isSinglePlayer) {
+			setTimeout(() => {
+				if (gameState && gameState.turn === 2) scheduleAIMoveIfNeeded();
+			}, 60);
+		}
 	}
 }
 
@@ -459,4 +583,408 @@ closeRulesBtn.addEventListener('click', ()=>{ rulesModal.classList.add('hidden')
 
 // İlk boyutlandırma
 resizeCanvasAndSetStep();
+
+// --- Yeni eklenen fonksiyon: checkCompletedSquares ---
+// filepath: c:\Users\cemyi\Desktop\oyunproje\game.js
+function checkCompletedSquares(state, p1, p2) {
+	let completedCount = 0;
+	// use min coords to be robust regardless of edge orientation
+	const x = Math.min(p1.x, p2.x);
+	const y = Math.min(p1.y, p2.y);
+
+	// helper to test and claim a square at (sx, sy)
+	function tryClaim(sx, sy) {
+		if (sx < 0 || sx >= N || sy < 0 || sy >= N) return;
+		if (!Array.isArray(state.squares) || !Array.isArray(state.squares[sy])) return;
+		if (state.squares[sy][sx] !== 0) return;
+		if (countSides(state, sx, sy) === 4) {
+			state.squares[sy][sx] = state.turn;
+			completedCount++;
+		}
+	}
+
+	// If edge is horizontal (same y), it can affect square above (y-1) and below (y)
+	if (p1.y === p2.y) {
+		tryClaim(x, y - 1); // square above the horizontal edge
+		tryClaim(x, y);     // square below the horizontal edge
+	}
+	// vertical edge (same x): affects left (x-1) and right (x)
+	else if (p1.x === p2.x) {
+		tryClaim(x - 1, y); // square left of the vertical edge
+		tryClaim(x, y);     // square right of the vertical edge
+	}
+	return completedCount;
+}
+
+// Yeni: zamanlayıcı değişkenleri
+let turnTimer = null;
+let countdownInterval = null;
+let timeLeft = 0;
+
+function clearTurnTimer() {
+	// Cancel any existing timers and clear UI timer text
+	if (turnTimer) { clearTimeout(turnTimer); turnTimer = null; }
+	if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+	// Yeniden yaz (status'ı eski haline döndür)
+	updateStatusText();
+}
+
+function startTurnTimer() {
+	clearTurnTimer();
+	// Eğer oyun bitti ise başlama
+	if (gameState.gameOver) return;
+	// Local modda (aynı cihaz) her iki oyuncu için timer başlatılır
+	if (playerNumber === null) {
+		// İlk hamle için zamanlayıcı başlatma kuralı: edgesList.length === 0 ise timer yok
+		if (!Array.isArray(gameState.edgesList) || gameState.edgesList.length === 0) return;
+		timeLeft = (gameState.gameType === 'square') ? 5 : 3;
+		countdownInterval = setInterval(() => {
+			timeLeft--;
+			if (timeLeft <= 0) {
+				timeLeft = 0;
+				clearInterval(countdownInterval); countdownInterval = null;
+			}
+			updateStatusTextWithTimer();
+		}, 1000);
+		turnTimer = setTimeout(() => {
+			clearTurnTimer();
+			if (gameState.gameOver) return;
+			ensureGameStateDefaults();
+			// Sırası gelen oyuncu için otomatik hamle
+			const move = (gameState.gameType === 'square')
+				? pickRandomSquareMove(gameState)
+				: pickRandomPathMove(gameState);
+			if (move) processMove(move.a, move.b);
+		}, timeLeft * 1000);
+		return;
+	}
+	// Tek kişilik veya online modda sadece kendi sırası için timer başlatılır
+	if (typeof playerNumber === 'undefined' || playerNumber !== gameState.turn) return;
+	if (!Array.isArray(gameState.edgesList) || gameState.edgesList.length === 0) return;
+	timeLeft = (gameState.gameType === 'square') ? 5 : 3;
+	countdownInterval = setInterval(() => {
+		timeLeft--;
+		if (timeLeft <= 0) {
+			timeLeft = 0;
+			clearInterval(countdownInterval); countdownInterval = null;
+		}
+		updateStatusTextWithTimer();
+	}, 1000);
+	turnTimer = setTimeout(() => {
+		clearTurnTimer();
+		if (gameState.gameOver) return;
+		ensureGameStateDefaults();
+		if (gameState.gameType === 'square') {
+			const move = pickRandomSquareMove(gameState);
+			if (move) processMove(move.a, move.b);
+		} else {
+			const move = pickRandomPathMove(gameState);
+			if (move) processMove(move.a, move.b);
+		}
+	}, timeLeft * 1000);
+}
+
+function updateStatusTextWithTimer() {
+	updateStatusText();
+	// Local modda timer her iki oyuncu için gösterilmeli
+	if ((playerNumber === null || playerNumber === gameState.turn) && turnTimer) {
+		statusDiv.textContent = statusDiv.textContent + ` (Kalan süre: ${timeLeft}s)`;
+	}
+}
+
+// Yardımcı: tüm boş kenarları döndür
+function getAllUndrawnEdges(state) {
+	const edgesSet = new Set((state.edgesList || []).map(e => keyForEdge(e.a, e.b)));
+	const list = [];
+	for (let y = 0; y <= state.N; y++) {
+		for (let x = 0; x <= state.N; x++) {
+			// horizontal
+			if (x < state.N) {
+				const a = { x, y }, b = { x: x + 1, y };
+				if (!edgesSet.has(keyForEdge(a, b))) list.push({ a, b });
+			}
+			// vertical
+			if (y < state.N) {
+				const a = { x, y }, b = { x, y: y + 1 };
+				if (!edgesSet.has(keyForEdge(a, b))) list.push({ a, b });
+			}
+		}
+	}
+	return list;
+}
+
+// Yardımcı: state'den kenar seti oluştur
+function edgesSetFromState(state) {
+	const s = new Set();
+	(state.edgesList || []).forEach(e => s.add(keyForEdge(e.a, e.b)));
+	return s;
+}
+
+// countSides benzeri ama geçici kenar seti ile çalışır
+function countSidesWithSet(edgesSet, sx, sy) {
+	let c = 0;
+	if (edgesSet.has(keyForEdge({ x: sx, y: sy }, { x: sx + 1, y: sy }))) c++;
+	if (edgesSet.has(keyForEdge({ x: sx, y: sy + 1 }, { x: sx + 1, y: sy + 1 }))) c++;
+	if (edgesSet.has(keyForEdge({ x: sx, y: sy }, { x: sx, y: sy + 1 }))) c++;
+	if (edgesSet.has(keyForEdge({ x: sx + 1, y: sy }, { x: sx + 1, y: sy + 1 }))) c++;
+	return c;
+}
+
+// Verilen kenarın eklenmesiyle hangi karelerin tamamlanacağını say
+function completesSquaresWithSet(edgesSet, a, b, stateN) {
+	let completed = 0;
+	const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y);
+	function check(sx, sy) {
+		if (sx < 0 || sx >= stateN || sy < 0 || sy >= stateN) return;
+		if (countSidesWithSet(edgesSet, sx, sy) === 4) completed++;
+	}
+	if (a.y === b.y) { check(x, y - 1); check(x, y); }
+	else if (a.x === b.x) { check(x - 1, y); check(x, y); }
+	return completed;
+}
+
+// Verilen kenarın eklenmesiyle oluşturacağı "3 kenarlı kare" var mı?
+function createsThirdWithSet(edgesSet, a, b, stateN) {
+	const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y);
+	function check3(sx, sy) {
+		if (sx < 0 || sx >= stateN || sy < 0 || sy >= stateN) return false;
+		return countSidesWithSet(edgesSet, sx, sy) === 3;
+	}
+	if (a.y === b.y) { if (check3(x, y - 1)) return true; if (check3(x, y)) return true; }
+	else if (a.x === b.x) { if (check3(x - 1, y)) return true; if (check3(x, y)) return true; }
+	return false;
+}
+
+// Yeni akıllı seçim: Kare kapatma modu
+function pickRandomSquareMove(state) {
+	const all = getAllUndrawnEdges(state);
+	if (all.length === 0) return null;
+
+	const edgesSet = edgesSetFromState(state);
+	const winning = [], safe = [], risky = [];
+
+	for (const e of all) {
+		// simulate
+		const tmp = new Set(edgesSet);
+		tmp.add(keyForEdge(e.a, e.b));
+		const completed = completesSquaresWithSet(tmp, e.a, e.b, state.N);
+		if (completed > 0) { winning.push(e); continue; }
+
+		// oluşturacağı 3 kenarlı kare var mı?
+		if (createsThirdWithSet(tmp, e.a, e.b, state.N)) risky.push(e);
+		else safe.push(e);
+	}
+
+	if (winning.length > 0) return winning[Math.floor(Math.random() * winning.length)];
+	if (safe.length > 0) return safe[Math.floor(Math.random() * safe.length)];
+	return risky[Math.floor(Math.random() * risky.length)];
+}
+
+// Yeni akıllı seçim: Yol çizme modu (fallback ile güncellendi)
+function pickRandomPathMove(state) {
+	// İlk hamle: herhangi bir kenar
+	if (!Array.isArray(state.edgesList) || state.edgesList.length === 0) {
+		return pickRandomSquareMove(state);
+	}
+
+	const edgesSet = edgesSetFromState(state);
+	const visited = new Set();
+	(state.edgesList || []).forEach(e => { visited.add(keyForPoint(e.a)); visited.add(keyForPoint(e.b)); });
+
+	let candidates = [];
+
+	// İkinci hamle: ilk kenara bağlı olmalı
+	if (state.edgesList.length === 1) {
+		const first = state.edgesList[0];
+		const all = getAllUndrawnEdges(state);
+		for (const edge of all) {
+			if (pointEquals(edge.a, first.a) || pointEquals(edge.a, first.b) || pointEquals(edge.b, first.a) || pointEquals(edge.b, first.b)) {
+				candidates.push(edge);
+			}
+		}
+	} else {
+		// Sonraki hamleler: aktif uçtan bağlanmalı
+		const p = state.activeEndpoint;
+		if (!p) {
+			// fallback: herhangi bir boş kenar
+			return pickRandomSquareMove(state);
+		}
+		const neighbors = [
+			{ x: p.x + 1, y: p.y }, { x: p.x - 1, y: p.y },
+			{ x: p.x, y: p.y + 1 }, { x: p.x, y: p.y - 1 }
+		];
+		for (const n of neighbors) {
+			if (n.x >= 0 && n.x <= state.N && n.y >= 0 && n.y <= state.N) {
+				const key = keyForEdge(p, n);
+				if (!edgesSet.has(key)) candidates.push({ a: p, b: n });
+			}
+		}
+	}
+
+	// Eğer aday yoksa fallback: tüm boş kenarlardan en azından birini döndür
+	if (candidates.length === 0) {
+		const all = getAllUndrawnEdges(state);
+		if (all.length === 0) return null;
+		return all[Math.floor(Math.random() * all.length)];
+	}
+
+	// Ayır: hemen kaybettirenler ve güvenli olanlar
+	const safeMoves = [], losingMoves = [];
+	for (const m of candidates) {
+		// other endpoint
+		let other = null;
+		if (pointEquals(m.a, state.activeEndpoint)) other = m.b;
+		else if (pointEquals(m.b, state.activeEndpoint)) other = m.a;
+		else if (state.edgesList.length === 1) {
+			const first = state.edgesList[0];
+			if (pointEquals(m.a, first.a) || pointEquals(m.a, first.b)) other = m.b;
+			else other = m.a;
+		}
+
+		if (!other) continue;
+
+		if (isBorderPoint(other) || visited.has(keyForPoint(other))) {
+			losingMoves.push(m);
+			continue;
+		}
+
+		const tmpEdges = new Set(edgesSet);
+		tmpEdges.add(keyForEdge(m.a, m.b));
+		const newActive = other;
+		const tmpVisited = new Set(visited);
+		tmpVisited.add(keyForPoint(newActive));
+
+		let opponentMoves = 0;
+		const nbs = [
+			{ x: newActive.x + 1, y: newActive.y }, { x: newActive.x - 1, y: newActive.y },
+			{ x: newActive.x, y: newActive.y + 1 }, { x: newActive.x, y: newActive.y - 1 }
+		];
+		for (const nn of nbs) {
+			if (nn.x < 0 || nn.x > state.N || nn.y < 0 || nn.y > state.N) continue;
+			const kk = keyForEdge(newActive, nn);
+			if (!tmpEdges.has(kk) && !isBorderPoint(nn) && !tmpVisited.has(keyForPoint(nn))) opponentMoves++;
+		}
+		safeMoves.push({ move: m, opp: opponentMoves });
+	}
+
+	if (safeMoves.length === 0) {
+		if (losingMoves.length > 0) return losingMoves[Math.floor(Math.random() * losingMoves.length)];
+		return candidates[Math.floor(Math.random() * candidates.length)];
+	}
+
+	safeMoves.sort((a, b) => a.opp - b.opp);
+	const bestOpp = safeMoves[0].opp;
+	const best = safeMoves.filter(s => s.opp === bestOpp).map(s => s.move);
+	return best[Math.floor(Math.random() * best.length)];
+}
+
+// scheduleAIMoveIfNeeded: aiThinking'in temizlenmesini garanti et ve move yoksa temizle
+function scheduleAIMoveIfNeeded() {
+	if (!isSinglePlayer) return;
+	if (aiThinking) return;
+	if (gameState.gameOver) return;
+	if (gameState.turn !== 2) return;
+
+	aiThinking = true;
+	const prevPointer = canvas.style.pointerEvents;
+	canvas.style.pointerEvents = 'none';
+
+	setTimeout(() => {
+		try {
+			let move = null;
+			if (gameState.gameType === 'square') move = pickRandomSquareMove(gameState);
+			else move = pickRandomPathMove(gameState);
+
+			// fallback: eğer yine null ise tüm boş kenarlardan seç
+			if (!move) {
+				const all = getAllUndrawnEdges(gameState);
+				if (all.length > 0) move = all[Math.floor(Math.random() * all.length)];
+			}
+
+			if (move) {
+				processMove(move.a, move.b);
+			} else {
+				// Hamle bulunamazsa aiThinking'i temizle (güvenlik)
+				aiThinking = false;
+				if (!gameState.gameOver) canvas.style.pointerEvents = prevPointer || 'auto';
+			}
+		} catch (err) {
+			console.error('AI error:', err);
+			aiThinking = false;
+			if (!gameState.gameOver) canvas.style.pointerEvents = prevPointer || 'auto';
+		}
+	}, 700);
+}
+
+// Güncelle: updateLocalStateFromServer sonunda AI tetikleme
+function updateLocalStateFromServer() {
+	ensureGameStateDefaults();
+	gameType = gameState.gameType || gameType;
+	if (gridSizeDisplay) gridSizeDisplay.textContent = `${N} × ${N} Kare`;
+	if (gameTitle) gameTitle.textContent = `${gameType === 'square' ? 'Kare Kapatma' : 'Yol Çizme'}`;
+
+	if (gameType === 'square') scoreboard.classList.remove('hidden'); else scoreboard.classList.add('hidden');
+
+	// Eğer serverdan gelen squares matrisi N ile uyumlu değilse yeniden boyutlandır
+	if (!Array.isArray(gameState.squares) || gameState.squares.length !== N) {
+		const newSquares = Array(N).fill(0).map(() => Array(N).fill(0));
+		if (Array.isArray(gameState.squares)) {
+			// var olan değerleri kopyala (sığ mümkünse)
+			for (let y = 0; y < Math.min(gameState.squares.length, N); y++) {
+				for (let x = 0; x < Math.min(gameState.squares[y].length || 0, N); x++) {
+					newSquares[y][x] = gameState.squares[y][x] || 0;
+				}
+			}
+		}
+		gameState.squares = newSquares;
+	}
+
+	updateStatusText();
+	updateScoreDisplay();
+	draw();
+
+	// Zamanlayıcı yönetimi: eğer oyun bitti temizle
+	if (gameState.gameOver) {
+		clearTurnTimer();
+		showGameOverScreen();
+	} else {
+		// Eğer bu istemcinin sırasıysa ve ilk hamle yapılmışsa başlat
+		if (typeof playerNumber !== 'undefined' && playerNumber === gameState.turn) {
+			if (Array.isArray(gameState.edgesList) && gameState.edgesList.length > 0) startTurnTimer();
+			else clearTurnTimer();
+		} else {
+			clearTurnTimer();
+		}
+		// Yeni: eğer single-player moddaysak ve AI sırasıysa AI'yi planla (küçük gecikmeyle)
+		if (!onlineRoom && isSinglePlayer) {
+			setTimeout(() => {
+				if (gameState && gameState.turn === 2) scheduleAIMoveIfNeeded();
+			}, 60);
+		}
+		gameOverModal.classList.add('hidden');
+	}
+}
+
+// Ayrıca showGameOverScreen içinde timer temizleme
+function showGameOverScreen() {
+	ensureGameStateDefaults();
+	clearTurnTimer();
+	const players = gameState.players || {};
+	const names = Object.keys(players).map(k => players[k].name);
+	const p1 = names[0] || 'Oyuncu 1', p2 = names[1] || 'Oyuncu 2';
+	let message = '';
+	if (gameType === 'square') {
+		const scoreText = `(${gameState.player1Score} - ${gameState.player2Score})`;
+		if (gameState.player1Score > gameState.player2Score) message = `${p1} Kazandı! ${scoreText}`;
+		else if (gameState.player2Score > gameState.player1Score) message = `${p2} Kazandı! ${scoreText}`;
+		else message = `Oyun Berabere! ${scoreText}`;
+	} else {
+		const losing = gameState.losingPlayer;
+		const lname = losing === 1 ? p1 : p2;
+		const wname = losing === 1 ? p2 : p1;
+		message = `${lname} Kaybetti! Kazanan: ${wname}`;
+	}
+	gameOverMessage.textContent = message;
+	gameOverModal.classList.remove('hidden');
+}
 

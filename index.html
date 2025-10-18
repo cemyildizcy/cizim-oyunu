@@ -23,14 +23,23 @@
 				<button id="typeSquare" class="mode-btn">Kare Kapatma</button>
 			</div>
 
-            <!-- Oyuncu Modu kaldırıldı, çünkü online modda her zaman iki kişilik olacak -->
+			<label class="label" style="margin-top: 10px;">Oyun Modu</label>
+			<div class="game-mode-selector" style="margin-bottom:12px">
+				<button id="modeSingle" class="mode-btn active">Bilgisayara Karşı</button>
+				<button id="modeLocal" class="mode-btn">Aynı Cihaz (2 Kişi)</button>
+			</div>
+
 			<div id="player-inputs" class="player-inputs" style="margin-top: 20px;">
-				<input id="playerName" type="text" placeholder="Oyuncu Adınız" value="Oyuncu 1" class="input">
+				<input id="player1Name" type="text" placeholder="Oyuncu 1 Adı" value="Oyuncu 1" class="input">
+				<input id="player2Name" type="text" placeholder="Oyuncu 2 Adı / Bilgisayar" value="Bilgisayar" class="input" disabled>
 			</div>
 
 			<div class="online-section" style="margin-top: 20px;">
 				<label class="label">Çevrimiçi Oyun</label>
 				<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;justify-content:center">
+					<input id="onlineCheckbox" type="checkbox" /> <label for="onlineCheckbox" style="margin:0 6px;color:var(--muted)">Çevrimiçi oyna</label>
+				</div>
+				<div id="roomRow" style="display:none; margin-top:8px">
 					<input id="roomInput" type="text" placeholder="Oda Kodu Girin (veya boş bırakın)" class="input" style="width:100%;padding:8px" />
 				</div>
 			</div>
@@ -45,42 +54,52 @@
 	</div>
 
 	<script>
+		// Mode & type buttons
 		const typePathBtn = document.getElementById('typePath');
 		const typeSquareBtn = document.getElementById('typeSquare');
+		const modeSingleBtn = document.getElementById('modeSingle');
+		const modeLocalBtn = document.getElementById('modeLocal');
+		const p1Input = document.getElementById('player1Name');
+		const p2Input = document.getElementById('player2Name');
+		const onlineCheckbox = document.getElementById('onlineCheckbox');
+		const roomRow = document.getElementById('roomRow');
 
-		typePathBtn.addEventListener('click', () => {
-			typePathBtn.classList.add('active');
-			typeSquareBtn.classList.remove('active');
+		typePathBtn.addEventListener('click', () => { typePathBtn.classList.add('active'); typeSquareBtn.classList.remove('active'); });
+		typeSquareBtn.addEventListener('click', () => { typeSquareBtn.classList.add('active'); typePathBtn.classList.remove('active'); });
+
+		modeSingleBtn.addEventListener('click', () => {
+			modeSingleBtn.classList.add('active'); modeLocalBtn.classList.remove('active');
+			p2Input.value = 'Bilgisayar'; p2Input.disabled = true;
+		});
+		modeLocalBtn.addEventListener('click', () => {
+			modeLocalBtn.classList.add('active'); modeSingleBtn.classList.remove('active');
+			p2Input.value = 'Oyuncu 2'; p2Input.disabled = false;
 		});
 
-		typeSquareBtn.addEventListener('click', () => {
-			typeSquareBtn.classList.add('active');
-			typePathBtn.classList.remove('active');
+		// show/hide oda girişi sadece online seçildiyse
+		onlineCheckbox.addEventListener('change', () => {
+			roomRow.style.display = onlineCheckbox.checked ? 'block' : 'none';
 		});
 
 		document.getElementById('startGameBtn').addEventListener('click', () => {
 			const input = document.getElementById('gridSizeInput');
 			let v = parseInt(input.value) || 5;
-			
-			if (v < 3 || v > 20) {
-				alert('Lütfen 3 ile 20 arasında bir ızgara boyutu seçin.');
-				v = Math.min(Math.max(v, 3), 20);
-				input.value = v;
-				return;
-			}
+			if (v < 3 || v > 20) { alert('Lütfen 3 ile 20 arasında bir ızgara boyutu seçin.'); input.value = Math.min(Math.max(v,3),20); return; }
 
-			const p1 = document.getElementById('playerName').value || 'Oyuncu 1';
+			const p1 = encodeURIComponent(p1Input.value || 'Oyuncu 1');
+			const p2 = encodeURIComponent(p2Input.value || (modeSingleBtn.classList.contains('active') ? 'Bilgisayar' : 'Oyuncu 2'));
 			const gameType = typeSquareBtn.classList.contains('active') ? 'square' : 'path';
-			
-			// Oda kodu al veya oluştur
-			let room = (document.getElementById('roomInput').value || '').trim();
-			if (!room) {
-				// Boş bırakılırsa 6 haneli rastgele bir kod oluştur
-				room = Math.random().toString(36).slice(2, 8).toUpperCase();
-			}
+			const mode = modeSingleBtn.classList.contains('active') ? 'single' : 'local';
 
-			// Oyuncuyu oyun sayfasına yönlendir
-			window.location.href = `game.html?size=${v}&p1=${encodeURIComponent(p1)}&type=${gameType}&room=${room}`;
+			// Eğer kullanıcı online oynamayı seçtiyse room param ekle (boşsa oluştur)
+			if (onlineCheckbox.checked) {
+				let room = (document.getElementById('roomInput').value || '').trim();
+				if (!room) room = Math.random().toString(36).slice(2,8).toUpperCase();
+				window.location.href = `game.html?size=${v}&p1=${p1}&p2=${p2}&type=${gameType}&room=${room}&mode=${mode}`;
+			} else {
+				// Lokal / AI modu: room param gönderme
+				window.location.href = `game.html?size=${v}&p1=${p1}&p2=${p2}&type=${gameType}&mode=${mode}`;
+			}
 		});
 	</script>
 </body>
