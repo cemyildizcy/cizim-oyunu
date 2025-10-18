@@ -109,7 +109,13 @@ function setupFirebaseConnection() {
 // Sunucudan gelen yeni verilerle yerel durumu günceller
 function updateLocalStateFromServer() {
     // Odaya sonradan katılan oyuncu, odanın ayarlarını benimser
-    N = gameState.N || N;
+    const serverN = gameState.N || N;
+    // Eğer N değeri sunucudan gelenle farklıysa, güncelle ve tuvali yeniden boyutlandır
+    if (N !== serverN) {
+        N = serverN;
+        resizeCanvasAndSetStep(); // DÜZELTME: N değiştiğinde tuvali yeniden boyutlandır
+    }
+
     gameType = gameState.gameType || gameType;
     if (gridSizeDisplay) gridSizeDisplay.textContent = `${N} × ${N} Kare`;
     if (gameTitle) gameTitle.textContent = `${gameType === 'square' ? 'Kare Kapatma' : 'Yol Çizme'}`;
