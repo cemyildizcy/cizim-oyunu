@@ -14,40 +14,37 @@
 		</header>
 
 		<main class="card center-card">
-			<label for="gridSizeInput" class="label">Kare Sayısı (NxN)</label>
-			<input id="gridSizeInput" type="number" min="3" max="20" value="5" class="input">
-			
-			<label class="label" style="margin-top: 10px;">Oyun Türü</label>
-			<div class="game-mode-selector">
-				<button id="typePath" class="mode-btn active">Yol Çizme</button>
-				<button id="typeSquare" class="mode-btn">Kare Kapatma</button>
-			</div>
+			<!-- Basit giriş ekranı: sadece gerekli alanlar -->
+			<div style="text-align:left;max-width:360px;margin:0 auto;">
+				<label class="label">Izgara (N × N)</label>
+				<input id="gridSizeInput" type="number" min="3" max="20" value="5" class="input" />
 
-			<label class="label" style="margin-top: 10px;">Oyun Modu</label>
-			<div class="game-mode-selector" style="margin-bottom:12px">
-				<button id="modeSingle" class="mode-btn active">Bilgisayara Karşı</button>
-				<button id="modeLocal" class="mode-btn">Aynı Cihaz (2 Kişi)</button>
-			</div>
-
-			<div id="player-inputs" class="player-inputs" style="margin-top: 20px;">
-				<input id="player1Name" type="text" placeholder="Oyuncu 1 Adı" value="Oyuncu 1" class="input">
-				<input id="player2Name" type="text" placeholder="Oyuncu 2 Adı / Bilgisayar" value="Bilgisayar" class="input" disabled>
-			</div>
-
-			<div class="online-section" style="margin-top: 20px;">
-				<label class="label">Çevrimiçi Oyun</label>
-				<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;justify-content:center">
-					<input id="onlineCheckbox" type="checkbox" /> <label for="onlineCheckbox" style="margin:0 6px;color:var(--muted)">Çevrimiçi oyna</label>
+				<label class="label">Oyun Türü</label>
+				<div class="game-mode-selector" style="margin-bottom:10px">
+					<button id="typePath" class="mode-btn active">Yol Çizme</button>
+					<button id="typeSquare" class="mode-btn">Kare Kapatma</button>
 				</div>
-				<div id="roomRow" style="display:none; margin-top:8px">
-					<input id="roomInput" type="text" placeholder="Oda Kodu Girin (veya boş bırakın)" class="input" style="width:100%;padding:8px" />
-				</div>
-			</div>
 
-			<div class="row">
-				<button id="startGameBtn" class="btn primary">Oda Oluştur / Katıl</button>
+				<label class="label">Oyun Modu</label>
+				<div class="game-mode-selector" style="margin-bottom:10px">
+					<button id="modeSingle" class="mode-btn active">Tek Kişi</button>
+					<button id="modeLocal" class="mode-btn">2 Kişi (Aynı Cihaz)</button>
+				</div>
+
+				<label class="label">İsimler</label>
+				<div class="player-inputs" style="margin-bottom:8px">
+					<input id="player1Name" class="input" value="Oyuncu 1" />
+					<input id="player2Name" class="input" value="Bilgisayar" disabled />
+				</div>
+
+				<label style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><input id="onlineCheckbox" type="checkbox" /> Çevrimiçi oyna (isteğe bağlı)</label>
+				<div id="roomRow" style="display:none;margin-bottom:12px">
+					<input id="roomInput" class="input" placeholder="Oda Kodu (opsiyonel)" />
+				</div>
+
+				<button id="startGameBtn" class="btn primary" style="width:100%;">Başla</button>
+				<div style="text-align:center;margin-top:10px;color:var(--muted);font-size:13px">Basit mod: sadece gerekli seçenekler gösteriliyor.</div>
 			</div>
-			<small class="hint">Arkadaşınla oynamak için aynı Oda Kodunu gir.</small>
 		</main>
 
 		<footer class="footer">©Cem YILDIZ tarafından yapılmıştır.</footer>

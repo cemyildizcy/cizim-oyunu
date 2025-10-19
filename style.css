@@ -21,7 +21,14 @@ body{
 	align-items:center;
 	justify-content:center;
 	padding:24px;
+	transition: background 0.4s ease; /* Arkaplan geçişi için eklendi */
 }
+
+/* YENİ: Hamle sırası oyuncudayken arkaplanı parlatan sınıf */
+body.my-turn {
+	background: radial-gradient(ellipse at center, rgba(22, 163, 74, 0.15) 0%, var(--bg) 65%);
+}
+
 
 /* Genel sayfa yapısı */
 .page{width:100%;max-width:1100px}
@@ -74,6 +81,12 @@ body{
 	display: flex;
 	gap: 10px;
 }
+.player-inputs {
+	display:flex;gap:8px;
+}
+@media (max-width:640px){
+	.player-inputs{flex-direction:column}
+}
 .row{display:flex;gap:8px;justify-content:center}
 .btn{
 	width: 100%;
@@ -112,11 +125,23 @@ body{
 	padding: 12px;
 }
 #gameCanvas{
+	/* Normalde beyaz arka plan: ızgara net beyaz görünmeli */
 	background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 	border-radius:10px;
 	box-shadow: 0 8px 30px rgba(2,6,23,0.6);
 	border:1px solid rgba(2,6,23,0.06);
 	cursor: crosshair;
+	transition: box-shadow 0.25s ease, transform 0.12s ease;
+}
+
+/* Sadece sıra sizdeyken canvas etrafında yeşil "yanan ışık" etkisi */
+body.my-turn #gameCanvas {
+	/* hafif yeşil glow */
+	box-shadow:
+		0 8px 40px rgba(16,185,129,0.18),
+		0 0 60px rgba(16,185,129,0.14) inset,
+		0 2px 12px rgba(16,185,129,0.08);
+	transform: translateY(-2px);
 }
 
 /* Game Over Modal */
@@ -205,3 +230,9 @@ body{
 	.center-card{padding:14px}
 	.brand h1{font-size:22px}
 }
+
+/* Yeni: giriş formu bölümleri için düzen ve açıklama */
+.form-section { margin-top: 12px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.03); }
+.section-title { font-weight:700;color:rgb(110, 243, 100);margin-bottom:8px;font-size:14px; }
+.form-row { display:flex;flex-direction:column;gap:8px;margin-bottom:8px;align-items:stretch; }
+.helper { color:var(--muted); font-size:12px; margin-top:2px; }

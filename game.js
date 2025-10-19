@@ -86,11 +86,11 @@ function ensureGameStateDefaults() {
 	// Her durumda ızgarayı hemen göster
 	resizeCanvasAndSetStep();
 
-	// Eğer kare kapatma modunda gelindiyse kuralları göster (kullanıcı görsün)
-	if (gameType === 'square') {
+	// Kuralları göster: hem "path" hem de "square" için detaylı kuralları aç
+	if (gameType === 'path' || gameType === 'square') {
 		displayRules();
 	}
-
+	
 	// Eğer onlineRoom varsa Firebase bağlantısını kur
 	if (onlineRoom && typeof database !== 'undefined' && database) {
 		setupFirebaseConnection();
@@ -208,6 +208,8 @@ function updateLocalStateFromServer() {
 		}
 		gameOverModal.classList.add('hidden');
 	}
+	// Görsel turn göstergesini buradan da güncelle (sunucudan gelen her durumda)
+	updateTurnVisualIndicator();
 }
 
 // oyunu sıfırlar ve başlangıç durumunu Firebase'e yazar
@@ -223,7 +225,12 @@ function resetGame() {
 		activeEndpoint: null,
 		gameOver: false,
 		N: N,
-		gameType: gameType
+		gameType: gameType,
+		// Offline/local modda mevcut players bilgisini koru
+		players: gameRef ? {} : (gameState.players || { 
+			p1: { name: myName }, 
+			p2: { name: isSinglePlayer ? 'Bilgisayar' : 'Oyuncu 2' } 
+		})
 	};
 	if (gameRef) gameRef.update(initialGameState);
 	else { gameState = initialGameState; ensureGameStateDefaults(); updateLocalStateFromServer(); }
@@ -243,13 +250,24 @@ function updateStatusText() {
 	const p2Name = (players.p2 && players.p2.name) || (Object.keys(players)[1] && players[Object.keys(players)[1]] && players[Object.keys(players)[1]].name) || 'Oyuncu 2';
 
 	const keys = Object.keys(players);
-	if (keys.length < 2 && !gameState.gameOver) { statusDiv.textContent = 'Rakip bekleniyor...'; return; }
-	if (gameState.gameOver) { statusDiv.textContent = 'Oyun Bitti!'; return; }
+	if (keys.length < 2 && !gameState.gameOver) { 
+		statusDiv.textContent = 'Rakip bekleniyor...'; 
+		updateTurnVisualIndicator(); // görsel güncelleme
+		return; 
+	}
+	if (gameState.gameOver) { 
+		statusDiv.textContent = 'Oyun Bitti!'; 
+		updateTurnVisualIndicator();
+		return; 
+	}
 	const current = gameState.turn === 1 ? p1Name : p2Name;
 	let text = `Sıra: ${current}`;
 	// Eğer local aynı cihaz modunda playerNumber null ise her iki oyuncuya izin ver => (Sıra Sende) sadece tek-kullanıcı modunda göster
 	if (playerNumber && playerNumber === gameState.turn) text += ' (Sıra Sende)';
 	statusDiv.textContent = text;
+
+	// Görsel göstergeyi güncelle
+	updateTurnVisualIndicator();
 }
 
 function updateScoreDisplay() {
@@ -280,18 +298,52 @@ function showGameOverScreen() {
 	}
 	gameOverMessage.textContent = message;
 	gameOverModal.classList.remove('hidden');
+
+	// Oyun bittiğinde görsel göstergeleri kaldır
+	document.body.classList.remove('my-turn');
 }
 
 function displayRules() {
     rulesModal.classList.remove('hidden');
     if (gameType === 'path') {
-        rulesTitle.textContent = "Yol Çizme Oyunu Kuralları";
-        rulesContent.innerHTML = `<ul>
-            <li>İlk hamle serbesttir.</li>
-            <li>İkinci hamle ilk çizginin bir ucuna bağlı olmak zorundadır.</li>
-            <li>Sonraki hamleler, aktif uçtan devam eder.</li>
-            <li>Aktif uç sınır veya daha önce ziyaret edilmiş noktaya götürürse o oyuncu kaybeder.</li>
-        </ul>`;
+        rulesTitle.textContent = "Yol Çizme Oyunu — Detaylı Kurallar";
+        rulesContent.innerHTML = `
+            <div class="rules-text">
+                <h3>Oyunun Amacı</h3>
+                <ul>
+                    <li>Oyun, ızgara üzerinde kesintisiz bir yol çizme yarışıdır.</li>
+                    <li>Kazanmak için rakibinizi çıkmaza sokmalı veya hatalı hamle yapmaya zorlamalısınız.</li>
+                </ul>
+
+                <h3>Hamle Kuralları</h3>
+                <ul>
+                    <li><strong>İlk Hamle:</strong> Herhangi iki nokta arasına bir çizgi çizilebilir.</li>
+                    <li><strong>İkinci Hamle:</strong> Rakip, ilk çizilen çizginin herhangi bir ucundan devam etmek zorundadır.</li>
+                    <li><strong>Sonraki Hamleler:</strong> Her oyuncu yeşil nokta ile gösterilen aktif uçtan devam etmelidir.</li>
+                </ul>
+
+                <h3>Kaybetme Durumları</h3>
+                <p>Şu durumlarda hamleyi yapan oyuncu kaybeder:</p>
+                <ul>
+                    <li>Aktif ucu ızgaranın sınırına götürmek</li>
+                    <li>Daha önce ziyaret edilmiş bir noktaya bağlanmak</li>
+                    <li>Hiç geçerli hamle kalmadığında (çıkmaz)</li>
+                </ul>
+
+                <h3>Strateji İpuçları</h3>
+                <ul>
+                    <li>Rakibi sınırlara veya daha önce çizilmiş yollara doğru yönlendirmeye çalışın</li>
+                    <li>Çıkış yollarını önceden planlayın</li>
+                    <li>Merkezde daha fazla hareket alanı vardır</li>
+                </ul>
+
+                <h3>Görsel İşaretler</h3>
+                <ul>
+                    <li>Yeşil Nokta: Aktif uç (buradan devam edilmeli)</li>
+                    <li>Mavi Çizgi: 1. Oyuncunun hamleleri</li>
+                    <li>Kırmızı Çizgi: 2. Oyuncunun hamleleri</li>
+                </ul>
+            </div>`;
     } else if (gameType === 'square') {
         rulesTitle.textContent = "Kare Kapatma — Kurallar (Detaylı)";
         rulesContent.innerHTML = `
@@ -389,15 +441,50 @@ function draw() {
 		}
 	}
 
+	// Kenarları çiz: son hamleyi daha belirgin yap
 	for (let i=0;i<edges.length;i++){
 		const e = edges[i];
 		const isLast = i===edges.length-1 && !gameOverLocal;
+
+		// Eğer son hamle ise önce geniş bir glow (yarı saydam) çiz
+		if (isLast) {
+			ctx.save();
+			const glowColor = (e.player === 1) ? 'rgba(79,70,229,0.20)' : 'rgba(239,68,68,0.20)';
+			ctx.strokeStyle = glowColor;
+			ctx.lineWidth = 14;
+			ctx.shadowColor = glowColor;
+			ctx.shadowBlur = 18;
+			ctx.beginPath();
+			ctx.moveTo(e.a.x*step, e.a.y*step);
+			ctx.lineTo(e.b.x*step, e.b.y*step);
+			ctx.stroke();
+			ctx.restore();
+		}
+
+		// Normal çizgiyi üstüne çiz
 		ctx.beginPath();
 		ctx.strokeStyle = (e.player===1) ? '#4f46e5' : '#ef4444';
 		ctx.lineWidth = isLast?7:5;
 		ctx.moveTo(e.a.x*step, e.a.y*step);
 		ctx.lineTo(e.b.x*step, e.b.y*step);
 		ctx.stroke();
+
+		// Son hamle ise orta noktada vurgu noktası ekle
+		if (isLast) {
+			const mx = ((e.a.x + e.b.x) / 2) * step;
+			const my = ((e.a.y + e.b.y) / 2) * step;
+			ctx.beginPath();
+			ctx.fillStyle = (e.player===1) ? 'rgba(79,70,229,0.95)' : 'rgba(239,68,68,0.95)';
+			ctx.arc(mx, my, 6, 0, Math.PI*2);
+			ctx.fill();
+
+			// ince beyaz halka
+			ctx.beginPath();
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+			ctx.arc(mx, my, 9, 0, Math.PI*2);
+			ctx.stroke();
+		}
 	}
 
 	if (activeEP && !gameOverLocal && gameType==='path') {
@@ -538,8 +625,16 @@ function getValidPathMoves(state){
 // Diğer yardımcılar
 function keyForEdge(a,b){ const s1=`${a.x},${a.y}`, s2=`${b.x},${b.y}`; return s1<s2?`${s1}-${s2}`:`${s2}-${s1}`; }
 function keyForPoint(p){ return `${p.x},${p.y}`; }
-function pointEquals(p1,p2){ return p1.x===p2.x && p1.y===p2.y; }
-function isBorderPoint(p){ return p.x===0||p.x===N||p.y===0||p.y===N; }
+function pointEquals(p1,p2){
+	// güvenli karşılaştırma: null/undefined koruması
+	if (!p1 || !p2) return false;
+	return p1.x===p2.x && p1.y===p2.y;
+}
+function isBorderPoint(p){
+	// güvenli kontrol: p boşsa sınır sayılmaz
+	if (!p) return false;
+	return p.x===0||p.x===N||p.y===0||p.y===N;
+}
 function countSides(state,x,y){
 	let count=0; const edges = new Set((state.edgesList||[]).map(e=>keyForEdge(e.a,e.b)));
 	if (edges.has(keyForEdge({x,y},{x:x+1,y}))) count++;
@@ -633,6 +728,16 @@ function startTurnTimer() {
 	clearTurnTimer();
 	// Eğer oyun bitti ise başlama
 	if (gameState.gameOver) return;
+
+	const commonTimeoutCallback = () => {
+		clearTurnTimer();
+		if (gameState.gameOver) return;
+		ensureGameStateDefaults();
+		// Süre dolduğunda yapılacak hamle stratejik değil, tamamen rastgele olacak.
+		const move = pickTrulyRandomAvailableMove(gameState);
+		if (move) processMove(move.a, move.b);
+	};
+
 	// Local modda (aynı cihaz) her iki oyuncu için timer başlatılır
 	if (playerNumber === null) {
 		// İlk hamle için zamanlayıcı başlatma kuralı: edgesList.length === 0 ise timer yok
@@ -646,18 +751,10 @@ function startTurnTimer() {
 			}
 			updateStatusTextWithTimer();
 		}, 1000);
-		turnTimer = setTimeout(() => {
-			clearTurnTimer();
-			if (gameState.gameOver) return;
-			ensureGameStateDefaults();
-			// Sırası gelen oyuncu için otomatik hamle
-			const move = (gameState.gameType === 'square')
-				? pickRandomSquareMove(gameState)
-				: pickRandomPathMove(gameState);
-			if (move) processMove(move.a, move.b);
-		}, timeLeft * 1000);
+		turnTimer = setTimeout(commonTimeoutCallback, timeLeft * 1000);
 		return;
 	}
+
 	// Tek kişilik veya online modda sadece kendi sırası için timer başlatılır
 	if (typeof playerNumber === 'undefined' || playerNumber !== gameState.turn) return;
 	if (!Array.isArray(gameState.edgesList) || gameState.edgesList.length === 0) return;
@@ -670,18 +767,7 @@ function startTurnTimer() {
 		}
 		updateStatusTextWithTimer();
 	}, 1000);
-	turnTimer = setTimeout(() => {
-		clearTurnTimer();
-		if (gameState.gameOver) return;
-		ensureGameStateDefaults();
-		if (gameState.gameType === 'square') {
-			const move = pickRandomSquareMove(gameState);
-			if (move) processMove(move.a, move.b);
-		} else {
-			const move = pickRandomPathMove(gameState);
-			if (move) processMove(move.a, move.b);
-		}
-	}, timeLeft * 1000);
+	turnTimer = setTimeout(commonTimeoutCallback, timeLeft * 1000);
 }
 
 function updateStatusTextWithTimer() {
@@ -755,7 +841,48 @@ function createsThirdWithSet(edgesSet, a, b, stateN) {
 	return false;
 }
 
-// Yeni akıllı seçim: Kare kapatma modu
+// YENİ FONKSİYON: Tamamen rastgele bir hamle seçer. Sadece süre dolduğunda kullanılır.
+function pickTrulyRandomAvailableMove(state) {
+    const allUndrawn = getAllUndrawnEdges(state);
+    if (allUndrawn.length === 0) return null;
+
+    if (state.gameType === 'square') {
+        // Kare oyununda, çizilmemiş herhangi bir kenar geçerlidir.
+        const randomIndex = Math.floor(Math.random() * allUndrawn.length);
+        return allUndrawn[randomIndex];
+    }
+    
+    // 'path' oyunu için geçerli hamleleri bul
+    let candidates = [];
+    if (!state.edgesList || state.edgesList.length === 0) {
+        // İlk hamle, herhangi bir yer olabilir.
+        candidates = allUndrawn;
+    } else if (state.edgesList.length === 1) {
+        // İkinci hamle, ilk çizgiye bağlı olmalı.
+        const first = state.edgesList[0];
+        for (const edge of allUndrawn) {
+            if (pointEquals(edge.a, first.a) || pointEquals(edge.a, first.b) || pointEquals(edge.b, first.a) || pointEquals(edge.b, first.b)) {
+                candidates.push(edge);
+            }
+        }
+    } else {
+        // Sonraki hamleler aktif uca bağlı olmalı.
+        candidates = getValidPathMoves(state);
+    }
+    
+    if (candidates.length === 0) {
+		// Eğer geçerli bir hamle bulunamazsa (normalde oyun bitti demektir),
+		// yine de bir hamle yapmak için çizilmemiş herhangi bir kenarı seç.
+		// Bu durum nadiren olmalı ama bir yedek mekanizma.
+        return allUndrawn[Math.floor(Math.random() * allUndrawn.length)];
+    }
+
+    // Adaylar arasından rastgele birini seç.
+    const randomIndex = Math.floor(Math.random() * candidates.length);
+    return candidates[randomIndex];
+}
+
+// Yeni akıllı seçim: Kare kapatma modu (YAPAY ZEKA İÇİN KULLANILIR)
 function pickRandomSquareMove(state) {
 	const all = getAllUndrawnEdges(state);
 	if (all.length === 0) return null;
@@ -780,7 +907,7 @@ function pickRandomSquareMove(state) {
 	return risky[Math.floor(Math.random() * risky.length)];
 }
 
-// Yeni akıllı seçim: Yol çizme modu (fallback ile güncellendi)
+// Yeni akıllı seçim: Yol çizme modu (YAPAY ZEKA İÇİN KULLANILIR)
 function pickRandomPathMove(state) {
 	// İlk hamle: herhangi bir kenar
 	if (!Array.isArray(state.edgesList) || state.edgesList.length === 0) {
@@ -833,8 +960,8 @@ function pickRandomPathMove(state) {
 	for (const m of candidates) {
 		// other endpoint
 		let other = null;
-		if (pointEquals(m.a, state.activeEndpoint)) other = m.b;
-		else if (pointEquals(m.b, state.activeEndpoint)) other = m.a;
+		if (state.activeEndpoint && pointEquals(m.a, state.activeEndpoint)) other = m.b;
+		else if (state.activeEndpoint && pointEquals(m.b, state.activeEndpoint)) other = m.a;
 		else if (state.edgesList.length === 1) {
 			const first = state.edgesList[0];
 			if (pointEquals(m.a, first.a) || pointEquals(m.a, first.b)) other = m.b;
@@ -902,14 +1029,13 @@ function scheduleAIMoveIfNeeded() {
 			}
 
 			if (move) {
+				// AI hamlesini uygula
 				processMove(move.a, move.b);
-			} else {
-				// Hamle bulunamazsa aiThinking'i temizle (güvenlik)
-				aiThinking = false;
-				if (!gameState.gameOver) canvas.style.pointerEvents = prevPointer || 'auto';
 			}
 		} catch (err) {
 			console.error('AI error:', err);
+		} finally {
+			// Her durumda aiThinking'i temizle ve pointer'ı geri getir
 			aiThinking = false;
 			if (!gameState.gameOver) canvas.style.pointerEvents = prevPointer || 'auto';
 		}
@@ -986,5 +1112,33 @@ function showGameOverScreen() {
 	}
 	gameOverMessage.textContent = message;
 	gameOverModal.classList.remove('hidden');
+
+	// Oyun bittiğinde görsel göstergeleri kaldır
+	document.body.classList.remove('my-turn');
 }
 
+// Yeni: Görsel turn göstergesi (body.my-turn sınıfı)
+// Kurala göre: sadece kare (square) modunda ve "bu cihazın" sırasıysa body'ye sınıf eklenir.
+// "Bu cihazın" olduğu durumu belirler:
+// - online ise: playerNumber tanımlıysa (1 veya 2) ve playerNumber === gameState.turn
+// - offline aynı cihaz modu (playerNumber === null): cihaz genelde Oyuncu 1 olarak kabul edilir -> gameState.turn === 1 ise göster
+function updateTurnVisualIndicator() {
+	ensureGameStateDefaults();
+	const body = document.body;
+	let myTurn = false;
+
+	// Sadece kare modu için görsel göster
+	if (gameState.gameType !== 'square') {
+		body.classList.remove('my-turn');
+		return;
+	}
+
+	if (typeof playerNumber === 'number') {
+		myTurn = (playerNumber === gameState.turn);
+	} else if (playerNumber === null) {
+		// Aynı cihaz modu: cihazı varsayılan olarak Oyuncu 1 kabul et
+		myTurn = (gameState.turn === 1);
+	}
+
+	if (myTurn) body.classList.add('my-turn'); else body.classList.remove('my-turn');
+}
