@@ -215,6 +215,8 @@ function updateLocalStateFromServer() {
 // oyunu sıfırlar ve başlangıç durumunu Firebase'e yazar
 function resetGame() {
 	if (playerNumber !== 1) return;
+
+	// ortak başlangıç durumu (players alanı burada yok)
 	const initialGameState = {
 		status: 'game_started',
 		turn: 1,
@@ -225,15 +227,22 @@ function resetGame() {
 		activeEndpoint: null,
 		gameOver: false,
 		N: N,
-		gameType: gameType,
-		// Offline/local modda mevcut players bilgisini koru
-		players: gameRef ? {} : (gameState.players || { 
-			p1: { name: myName }, 
-			p2: { name: isSinglePlayer ? 'Bilgisayar' : 'Oyuncu 2' } 
-		})
+		gameType: gameType
 	};
-	if (gameRef) gameRef.update(initialGameState);
-	else { gameState = initialGameState; ensureGameStateDefaults(); updateLocalStateFromServer(); }
+
+	if (gameRef) {
+		// Online: players alanını güncellemeden sadece oyun verisini güncelle
+		gameRef.update(initialGameState);
+	} else {
+		// Offline: mevcut players bilgisini koru veya yeni ekle
+		initialGameState.players = gameState.players || {
+			p1: { name: myName },
+			p2: { name: isSinglePlayer ? 'Bilgisayar' : 'Oyuncu 2' }
+		};
+		gameState = initialGameState;
+		ensureGameStateDefaults();
+		updateLocalStateFromServer();
+	}
 	displayRules();
 }
 
