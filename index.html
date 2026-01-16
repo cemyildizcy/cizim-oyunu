@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<title>Strateji Oyunları — Çizgi Savaşları & Go</title>
+	<title>Strateji Oyunları — Zeka & Rekabet</title>
 	<link rel="stylesheet" href="style.css">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +12,7 @@
 	<style>
 		.games-grid {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+			grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 			gap: 20px;
 			margin-top: 32px;
 		}
@@ -21,7 +21,7 @@
 			background: var(--bg-card);
 			border: 1px solid var(--border);
 			border-radius: var(--radius);
-			padding: 24px;
+			padding: 32px 24px;
 			text-align: center;
 			transition: all 0.3s ease;
 			cursor: pointer;
@@ -29,89 +29,86 @@
 			overflow: hidden;
 		}
 
-		.game-card:hover {
-			transform: translateY(-4px);
-			border-color: var(--accent-1);
-			box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
-		}
-
 		.game-card::before {
 			content: '';
 			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			height: 4px;
-			background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
-			opacity: 0;
+			inset: -1px;
+			border-radius: var(--radius);
+			padding: 1px;
+			background: linear-gradient(135deg, var(--neon-pink), transparent 40%, transparent 60%, var(--neon-cyan));
+			-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			-webkit-mask-composite: xor;
+			mask-composite: exclude;
+			opacity: 0.3;
 			transition: opacity 0.3s ease;
+			pointer-events: none;
+		}
+
+		.game-card:hover {
+			transform: translateY(-4px);
 		}
 
 		.game-card:hover::before {
-			opacity: 1;
+			opacity: 0.8;
 		}
 
 		.game-icon {
-			font-size: 48px;
-			margin-bottom: 16px;
+			width: 64px;
+			height: 64px;
+			margin: 0 auto 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 32px;
+			background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(0, 240, 255, 0.1));
+			border-radius: 16px;
+			border: 1px solid var(--border);
 		}
 
 		.game-card h3 {
-			font-size: 20px;
+			font-size: 18px;
 			font-weight: 600;
 			margin-bottom: 8px;
 			color: var(--text);
 		}
 
 		.game-card p {
-			font-size: 14px;
-			color: var(--text-secondary);
+			font-size: 13px;
+			color: var(--text-muted);
 			line-height: 1.5;
 			margin-bottom: 16px;
 		}
 
+		.game-tags {
+			display: flex;
+			justify-content: center;
+			gap: 8px;
+			flex-wrap: wrap;
+		}
+
 		.game-tag {
-			display: inline-block;
 			padding: 4px 10px;
-			background: var(--bg-hover);
+			background: var(--bg-secondary);
+			border: 1px solid var(--border);
 			border-radius: 20px;
-			font-size: 12px;
+			font-size: 11px;
 			color: var(--text-muted);
-			margin: 2px;
-		}
-
-		.hero {
-			text-align: center;
-			padding: 48px 0 24px;
-		}
-
-		.hero h1 {
-			font-size: 32px;
-			font-weight: 700;
-			letter-spacing: -1px;
-			background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			background-clip: text;
-			margin-bottom: 12px;
-		}
-
-		.hero p {
-			color: var(--text-muted);
-			font-size: 16px;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
 		}
 
 		.page {
-			max-width: 640px;
+			max-width: 600px;
 		}
 	</style>
 </head>
 
 <body>
 	<div class="page">
-		<header class="hero">
+		<header class="brand">
 			<h1>STRATEJİ OYUNLARI</h1>
-			<p>Klasik zeka oyunları • Tek başına veya arkadaşınla</p>
+			<p class="subtitle">Klasik zeka oyunları • Tek başına veya arkadaşınla</p>
 		</header>
 
 		<div class="games-grid">
@@ -119,11 +116,11 @@
 			<div class="game-card" onclick="location.href='cizgi/index.html'">
 				<div class="game-icon">✏️</div>
 				<h3>Çizgi Savaşları</h3>
-				<p>Yol çizme ve kare kapatma. Rakibini stratejiyle yen!</p>
-				<div>
+				<p>Yol çizme ve kare kapatma. Stratejiyle rakibini yen!</p>
+				<div class="game-tags">
 					<span class="game-tag">2 Oyuncu</span>
 					<span class="game-tag">AI</span>
-					<span class="game-tag">Çevrimiçi</span>
+					<span class="game-tag">Online</span>
 				</div>
 			</div>
 
@@ -132,15 +129,15 @@
 				<div class="game-icon">⚫</div>
 				<h3>Go (Baduk)</h3>
 				<p>Dünyanın en eski strateji oyunu. Alan kap, taş yakala!</p>
-				<div>
+				<div class="game-tags">
 					<span class="game-tag">2 Oyuncu</span>
-					<span class="game-tag">9x9</span>
+					<span class="game-tag">9×9</span>
 					<span class="game-tag">Klasik</span>
 				</div>
 			</div>
 		</div>
 
-		<footer class="footer" style="margin-top:48px">© Cem YILDIZ</footer>
+		<footer class="footer">© Cem YILDIZ</footer>
 	</div>
 </body>
 
