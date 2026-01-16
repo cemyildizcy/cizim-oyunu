@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Çizgi Savaşları — Rekabetçi Strateji Oyunu</title>
+	<link rel="stylesheet" href="../style.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+	<div class="page">
+		<header class="brand">
+			<h1>ÇİZGİ SAVAŞLARI</h1>
+			<p class="subtitle">Strateji • Rekabet • Zafer</p>
+		</header>
+
+		<main class="card center-card">
+			<!-- Oyun Türü Seçimi -->
+			<label class="label">Oyun Türü</label>
+			<div class="game-mode-selector">
+				<button id="typePath" class="mode-btn active">Yol Çizme</button>
+				<button id="typeSquare" class="mode-btn">Kare Kapatma</button>
+			</div>
+
+			<!-- Izgara Boyutu -->
+			<label class="label">Izgara Boyutu</label>
+			<input id="gridSizeInput" type="number" min="3" max="15" value="5" class="input"
+				style="margin-bottom:16px" />
+
+			<div class="form-section">
+				<div class="section-title">Oyun Modu</div>
+
+				<div class="game-mode-selector">
+					<button id="modeSingle" class="mode-btn active">Bilgisayara Karşı</button>
+					<button id="modeLocal" class="mode-btn">2 Kişi</button>
+				</div>
+
+				<div id="aiDifficultyRow">
+					<label class="label">Zorluk</label>
+					<div class="difficulty-selector">
+						<button id="diffEasy" class="mode-btn">Kolay</button>
+						<button id="diffMedium" class="mode-btn active">Orta</button>
+						<button id="diffHard" class="mode-btn">Zor</button>
+					</div>
+				</div>
+
+				<label class="label">Oyuncu İsimleri</label>
+				<div class="player-inputs">
+					<input id="player1Name" class="input" value="Oyuncu 1" placeholder="Senin İsmin" />
+					<input id="player2Name" class="input" value="Bilgisayar" disabled />
+				</div>
+			</div>
+
+			<div class="form-section">
+				<div class="section-title">Çevrimiçi</div>
+				<label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+					<input id="onlineCheckbox" type="checkbox" />
+					<span style="color:var(--text-secondary)">Arkadaşınla oyna</span>
+				</label>
+				<div id="roomRow" style="display:none;margin-top:12px">
+					<input id="roomInput" class="input" placeholder="Oda kodu (boş bırak = yeni oda)" />
+				</div>
+			</div>
+
+			<button id="startGameBtn" class="btn primary" style="margin-top:24px">Oyuna Başla</button>
+			<button id="showLeaderboardBtn" class="btn ghost" style="margin-top:12px">Liderlik Tablosu</button>
+		</main>
+
+		<footer class="footer">© Cem YILDIZ</footer>
+	</div>
+
+	<!-- Liderlik Tablosu Modal -->
+	<div id="leaderboardModal" class="modal-overlay hidden">
+		<div class="modal-content">
+			<h2>Liderlik Tablosu</h2>
+			<div id="leaderboardContent">
+				<p style="color:var(--text-muted)">Yükleniyor...</p>
+			</div>
+			<div class="modal-buttons">
+				<button id="closeLeaderboardBtn" class="btn primary">Kapat</button>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+	<script>
+		const firebaseConfig = {
+			apiKey: "AIzaSyCbCrS4ku7_E5qEUqAbFGLjDq3tyD9Tdnw",
+			authDomain: "cizgisavaslari-98312.firebaseapp.com",
+			databaseURL: "https://cizgisavaslari-98312-default-rtdb.firebaseio.com",
+			projectId: "cizgisavaslari-98312",
+			storageBucket: "cizgisavaslari-98312.appspot.com",
+			messagingSenderId: "236401267419",
+			appId: "1:236401267419:web:1e2f9efaba97ad08b532fe"
+		};
+
+		firebase.initializeApp(firebaseConfig);
+		const database = firebase.database();
+
+		// DOM Elementleri
+		const typePathBtn = document.getElementById('typePath');
+		const typeSquareBtn = document.getElementById('typeSquare');
+		const modeSingleBtn = document.getElementById('modeSingle');
+		const modeLocalBtn = document.getElementById('modeLocal');
+		const p1Input = document.getElementById('player1Name');
+		const p2Input = document.getElementById('player2Name');
+		const onlineCheckbox = document.getElementById('onlineCheckbox');
+		const roomRow = document.getElementById('roomRow');
+		const aiDifficultyRow = document.getElementById('aiDifficultyRow');
+		const diffEasyBtn = document.getElementById('diffEasy');
+		const diffMediumBtn = document.getElementById('diffMedium');
+		const diffHardBtn = document.getElementById('diffHard');
+		const diffButtons = [diffEasyBtn, diffMediumBtn, diffHardBtn];
+		const gridSizeInput = document.getElementById('gridSizeInput');
+		const leaderboardModal = document.getElementById('leaderboardModal');
+		const closeLeaderboardBtn = document.getElementById('closeLeaderboardBtn');
+		const showLeaderboardBtn = document.getElementById('showLeaderboardBtn');
+		const leaderboardContent = document.getElementById('leaderboardContent');
+
+		// Mod ve Tip Güncelleyiciler
+		const updateModeButtons = (activeBtn) => {
+			[modeSingleBtn, modeLocalBtn].forEach(btn => btn.classList.remove('active'));
+			activeBtn.classList.add('active');
+
+			const isSingle = activeBtn === modeSingleBtn;
+			p2Input.value = isSingle ? 'Bilgisayar' : 'Oyuncu 2';
+			p2Input.disabled = isSingle;
+			aiDifficultyRow.style.display = isSingle ? 'block' : 'none';
+
+			localStorage.setItem('gameMode', isSingle ? 'single' : 'local');
+			onlineCheckbox.disabled = isSingle;
+			if (isSingle) {
+				onlineCheckbox.checked = false;
+				onlineCheckbox.dispatchEvent(new Event('change'));
+			}
+		};
+
+		const updateTypeButtons = (activeBtn) => {
+			[typePathBtn, typeSquareBtn].forEach(btn => btn.classList.remove('active'));
+			activeBtn.classList.add('active');
+			localStorage.setItem('gameType', activeBtn === typeSquareBtn ? 'square' : 'path');
+		};
+
+		const updateDifficultyButtons = (activeBtn) => {
+			diffButtons.forEach(btn => btn.classList.remove('active'));
+			activeBtn.classList.add('active');
+			localStorage.setItem('aiDifficulty', activeBtn.id.replace('diff', '').toLowerCase());
+		};
+
+		// Liderlik Tablosu
+		function loadLeaderboard() {
+			leaderboardContent.innerHTML = '<p style="color:var(--text-muted)">Yükleniyor...</p>';
+			leaderboardModal.classList.remove('hidden');
+
+			const leaderboardRef = database.ref('leaderboard').orderByValue().limitToLast(10);
+			leaderboardRef.once('value', (snapshot) => {
+				const players = [];
+				snapshot.forEach(child => {
+					players.push({ name: child.key, wins: child.val() });
+				});
+
+				players.sort((a, b) => b.wins - a.wins);
+
+				let listHtml = '<ul>';
+				if (players.length === 0) {
+					listHtml += '<li style="justify-content:center;color:var(--text-muted)">Henüz veri yok</li>';
+				} else {
+					players.forEach((p, index) => {
+						listHtml += `<li><span>#${index + 1} ${p.name}</span><span>${p.wins} galibiyet</span></li>`;
+					});
+				}
+				listHtml += '</ul>';
+				leaderboardContent.innerHTML = listHtml;
+			}).catch(error => {
+				leaderboardContent.innerHTML = `<p style="color:var(--danger)">Bağlantı hatası</p>`;
+			});
+		}
+
+		// LocalStorage'dan yükle
+		(function loadPreferences() {
+			const storedSize = localStorage.getItem('gridSize');
+			if (storedSize) gridSizeInput.value = storedSize;
+
+			const storedP1Name = localStorage.getItem('player1Name');
+			if (storedP1Name) p1Input.value = storedP1Name;
+
+			const storedType = localStorage.getItem('gameType') || 'path';
+			updateTypeButtons(storedType === 'square' ? typeSquareBtn : typePathBtn);
+
+			const storedMode = localStorage.getItem('gameMode') || 'single';
+			updateModeButtons(storedMode === 'local' ? modeLocalBtn : modeSingleBtn);
+
+			const storedDifficulty = localStorage.getItem('aiDifficulty') || 'medium';
+			const activeDiffBtn = document.getElementById('diff' + storedDifficulty.charAt(0).toUpperCase() + storedDifficulty.slice(1)) || diffMediumBtn;
+			updateDifficultyButtons(activeDiffBtn);
+		})();
+
+		// Event Listeners
+		typePathBtn.addEventListener('click', () => updateTypeButtons(typePathBtn));
+		typeSquareBtn.addEventListener('click', () => updateTypeButtons(typeSquareBtn));
+		modeSingleBtn.addEventListener('click', () => updateModeButtons(modeSingleBtn));
+		modeLocalBtn.addEventListener('click', () => updateModeButtons(modeLocalBtn));
+		diffEasyBtn.addEventListener('click', () => updateDifficultyButtons(diffEasyBtn));
+		diffMediumBtn.addEventListener('click', () => updateDifficultyButtons(diffMediumBtn));
+		diffHardBtn.addEventListener('click', () => updateDifficultyButtons(diffHardBtn));
+
+		gridSizeInput.addEventListener('change', () => {
+			localStorage.setItem('gridSize', gridSizeInput.value);
+		});
+
+		p1Input.addEventListener('input', () => {
+			localStorage.setItem('player1Name', p1Input.value);
+		});
+
+		onlineCheckbox.addEventListener('change', () => {
+			roomRow.style.display = onlineCheckbox.checked ? 'block' : 'none';
+		});
+
+		showLeaderboardBtn.addEventListener('click', loadLeaderboard);
+		closeLeaderboardBtn.addEventListener('click', () => { leaderboardModal.classList.add('hidden'); });
+
+		document.getElementById('startGameBtn').addEventListener('click', () => {
+			let v = parseInt(gridSizeInput.value) || 5;
+			if (v < 3 || v > 15) {
+				alert('Lütfen 3 ile 15 arasında bir boyut seçin.');
+				gridSizeInput.value = Math.min(Math.max(v, 3), 15);
+				return;
+			}
+
+			localStorage.setItem('gridSize', v);
+			localStorage.setItem('player1Name', p1Input.value);
+
+			const p1 = encodeURIComponent(p1Input.value || 'Oyuncu 1');
+			const isSingle = modeSingleBtn.classList.contains('active');
+			const p2 = encodeURIComponent(p2Input.value || (isSingle ? 'Bilgisayar' : 'Oyuncu 2'));
+
+			const gameType = typeSquareBtn.classList.contains('active') ? 'square' : 'path';
+			const mode = isSingle ? 'single' : 'local';
+
+			let difficulty = 'medium';
+			if (isSingle) {
+				if (diffEasyBtn.classList.contains('active')) difficulty = 'easy';
+				else if (diffHardBtn.classList.contains('active')) difficulty = 'hard';
+			}
+
+			let url = `game.html?size=${v}&p1=${p1}&p2=${p2}&type=${gameType}&mode=${mode}&difficulty=${difficulty}`;
+
+			if (onlineCheckbox.checked && !isSingle) {
+				let room = (document.getElementById('roomInput').value || '').trim();
+				if (!room) room = Math.random().toString(36).slice(2, 8).toUpperCase();
+				url += `&room=${room}`;
+			}
+
+			window.location.href = url;
+		});
+	</script>
+</body>
+
+</html>

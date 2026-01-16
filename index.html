@@ -1,106 +1,147 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<title>Çizgi Savaşları — Başlangıç</title>
+	<title>Strateji Oyunları — Çizgi Savaşları & Go</title>
 	<link rel="stylesheet" href="style.css">
-	<!-- Google AdSense: site genelinde yüklenecek -->
-	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2160219446901494"
-	    crossorigin="anonymous"></script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+		.games-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+			gap: 20px;
+			margin-top: 32px;
+		}
+
+		.game-card {
+			background: var(--bg-card);
+			border: 1px solid var(--border);
+			border-radius: var(--radius);
+			padding: 24px;
+			text-align: center;
+			transition: all 0.3s ease;
+			cursor: pointer;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.game-card:hover {
+			transform: translateY(-4px);
+			border-color: var(--accent-1);
+			box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+		}
+
+		.game-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 4px;
+			background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+			opacity: 0;
+			transition: opacity 0.3s ease;
+		}
+
+		.game-card:hover::before {
+			opacity: 1;
+		}
+
+		.game-icon {
+			font-size: 48px;
+			margin-bottom: 16px;
+		}
+
+		.game-card h3 {
+			font-size: 20px;
+			font-weight: 600;
+			margin-bottom: 8px;
+			color: var(--text);
+		}
+
+		.game-card p {
+			font-size: 14px;
+			color: var(--text-secondary);
+			line-height: 1.5;
+			margin-bottom: 16px;
+		}
+
+		.game-tag {
+			display: inline-block;
+			padding: 4px 10px;
+			background: var(--bg-hover);
+			border-radius: 20px;
+			font-size: 12px;
+			color: var(--text-muted);
+			margin: 2px;
+		}
+
+		.hero {
+			text-align: center;
+			padding: 48px 0 24px;
+		}
+
+		.hero h1 {
+			font-size: 32px;
+			font-weight: 700;
+			letter-spacing: -1px;
+			background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			margin-bottom: 12px;
+		}
+
+		.hero p {
+			color: var(--text-muted);
+			font-size: 16px;
+		}
+
+		.page {
+			max-width: 640px;
+		}
+	</style>
 </head>
+
 <body>
 	<div class="page">
-		<header class="brand">
-			<h1>Çizgi Savaşları</h1>
-			<p class="subtitle">İki oyunculu zeka oyunu — önce ızgara boyutunu seçin</p>
+		<header class="hero">
+			<h1>STRATEJİ OYUNLARI</h1>
+			<p>Klasik zeka oyunları • Tek başına veya arkadaşınla</p>
 		</header>
 
-		<main class="card center-card">
-			<!-- Basit giriş ekranı: sadece gerekli alanlar -->
-			<div style="text-align:left;max-width:360px;margin:0 auto;">
-				<label class="label">Izgara (N × N)</label>
-				<input id="gridSizeInput" type="number" min="3" max="20" value="5" class="input" />
-
-				<label class="label">Oyun Türü</label>
-				<div class="game-mode-selector" style="margin-bottom:10px">
-					<button id="typePath" class="mode-btn active">Yol Çizme</button>
-					<button id="typeSquare" class="mode-btn">Kare Kapatma</button>
+		<div class="games-grid">
+			<!-- Çizgi Savaşları -->
+			<div class="game-card" onclick="location.href='cizgi/index.html'">
+				<div class="game-icon">✏️</div>
+				<h3>Çizgi Savaşları</h3>
+				<p>Yol çizme ve kare kapatma. Rakibini stratejiyle yen!</p>
+				<div>
+					<span class="game-tag">2 Oyuncu</span>
+					<span class="game-tag">AI</span>
+					<span class="game-tag">Çevrimiçi</span>
 				</div>
-
-				<label class="label">Oyun Modu</label>
-				<div class="game-mode-selector" style="margin-bottom:10px">
-					<button id="modeSingle" class="mode-btn active">Tek Kişi</button>
-					<button id="modeLocal" class="mode-btn">2 Kişi (Aynı Cihaz)</button>
-				</div>
-
-				<label class="label">İsimler</label>
-				<div class="player-inputs" style="margin-bottom:8px">
-					<input id="player1Name" class="input" value="Oyuncu 1" />
-					<input id="player2Name" class="input" value="Bilgisayar" disabled />
-				</div>
-
-				<label style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><input id="onlineCheckbox" type="checkbox" /> Çevrimiçi oyna (isteğe bağlı)</label>
-				<div id="roomRow" style="display:none;margin-bottom:12px">
-					<input id="roomInput" class="input" placeholder="Oda Kodu (opsiyonel)" />
-				</div>
-
-				<button id="startGameBtn" class="btn primary" style="width:100%;">Başla</button>
-				<div style="text-align:center;margin-top:10px;color:var(--muted);font-size:13px">Basit mod: sadece gerekli seçenekler gösteriliyor.</div>
 			</div>
-		</main>
 
-		<footer class="footer">©Cem YILDIZ tarafından yapılmıştır.</footer>
+			<!-- Go Oyunu -->
+			<div class="game-card" onclick="location.href='go/index.html'">
+				<div class="game-icon">⚫</div>
+				<h3>Go (Baduk)</h3>
+				<p>Dünyanın en eski strateji oyunu. Alan kap, taş yakala!</p>
+				<div>
+					<span class="game-tag">2 Oyuncu</span>
+					<span class="game-tag">9x9</span>
+					<span class="game-tag">Klasik</span>
+				</div>
+			</div>
+		</div>
+
+		<footer class="footer" style="margin-top:48px">© Cem YILDIZ</footer>
 	</div>
-
-	<script>
-		// Mode & type buttons
-		const typePathBtn = document.getElementById('typePath');
-		const typeSquareBtn = document.getElementById('typeSquare');
-		const modeSingleBtn = document.getElementById('modeSingle');
-		const modeLocalBtn = document.getElementById('modeLocal');
-		const p1Input = document.getElementById('player1Name');
-		const p2Input = document.getElementById('player2Name');
-		const onlineCheckbox = document.getElementById('onlineCheckbox');
-		const roomRow = document.getElementById('roomRow');
-
-		typePathBtn.addEventListener('click', () => { typePathBtn.classList.add('active'); typeSquareBtn.classList.remove('active'); });
-		typeSquareBtn.addEventListener('click', () => { typeSquareBtn.classList.add('active'); typePathBtn.classList.remove('active'); });
-
-		modeSingleBtn.addEventListener('click', () => {
-			modeSingleBtn.classList.add('active'); modeLocalBtn.classList.remove('active');
-			p2Input.value = 'Bilgisayar'; p2Input.disabled = true;
-		});
-		modeLocalBtn.addEventListener('click', () => {
-			modeLocalBtn.classList.add('active'); modeSingleBtn.classList.remove('active');
-			p2Input.value = 'Oyuncu 2'; p2Input.disabled = false;
-		});
-
-		// show/hide oda girişi sadece online seçildiyse
-		onlineCheckbox.addEventListener('change', () => {
-			roomRow.style.display = onlineCheckbox.checked ? 'block' : 'none';
-		});
-
-		document.getElementById('startGameBtn').addEventListener('click', () => {
-			const input = document.getElementById('gridSizeInput');
-			let v = parseInt(input.value) || 5;
-			if (v < 3 || v > 20) { alert('Lütfen 3 ile 20 arasında bir ızgara boyutu seçin.'); input.value = Math.min(Math.max(v,3),20); return; }
-
-			const p1 = encodeURIComponent(p1Input.value || 'Oyuncu 1');
-			const p2 = encodeURIComponent(p2Input.value || (modeSingleBtn.classList.contains('active') ? 'Bilgisayar' : 'Oyuncu 2'));
-			const gameType = typeSquareBtn.classList.contains('active') ? 'square' : 'path';
-			const mode = modeSingleBtn.classList.contains('active') ? 'single' : 'local';
-
-			// Eğer kullanıcı online oynamayı seçtiyse room param ekle (boşsa oluştur)
-			if (onlineCheckbox.checked) {
-				let room = (document.getElementById('roomInput').value || '').trim();
-				if (!room) room = Math.random().toString(36).slice(2,8).toUpperCase();
-				window.location.href = `game.html?size=${v}&p1=${p1}&p2=${p2}&type=${gameType}&room=${room}&mode=${mode}`;
-			} else {
-				// Lokal / AI modu: room param gönderme
-				window.location.href = `game.html?size=${v}&p1=${p1}&p2=${p2}&type=${gameType}&mode=${mode}`;
-			}
-		});
-	</script>
 </body>
+
 </html>

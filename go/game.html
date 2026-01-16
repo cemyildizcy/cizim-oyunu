@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Go (Baduk) — Oyun</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .go-board {
+            background: #DEB887;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .score-panel {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .score-box {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+
+        .score-box.active {
+            border: 2px solid var(--accent-1);
+        }
+
+        .score-box.black {
+            border-left: 4px solid #1a1a1a;
+        }
+
+        .score-box.white {
+            border-left: 4px solid #f5f5f5;
+        }
+
+        .score-box .name {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .score-box .captures {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .pass-btn {
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .pass-btn:hover {
+            background: var(--accent-1);
+            border-color: var(--accent-1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <header class="game-header">
+            <div class="info">
+                <div style="display:flex;gap:10px;align-items:baseline">
+                    <h2 id="gameTitle">Go</h2>
+                    <span id="boardSizeDisplay" style="color:var(--text-muted);font-size:13px"></span>
+                </div>
+                <div id="status" class="status">Yükleniyor...</div>
+            </div>
+            <div class="controls">
+                <button class="small-btn" onclick="location.href='index.html'">Geri</button>
+                <button class="small-btn pass-btn" id="passBtn">Pas</button>
+                <button class="small-btn" id="resetGameBtn">Yeniden</button>
+            </div>
+        </header>
+
+        <div class="score-panel">
+            <div class="score-box black" id="blackScore">
+                <div class="name" id="blackName">Siyah</div>
+                <div class="captures">Esir: <span id="blackCaptures">0</span></div>
+            </div>
+            <div class="score-box white" id="whiteScore">
+                <div class="name" id="whiteName">Beyaz</div>
+                <div class="captures">Esir: <span id="whiteCaptures">0</span></div>
+            </div>
+        </div>
+
+        <div class="canvas-wrap card" style="padding:16px;background:#DEB887">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <footer id="footerInfo" class="footer"></footer>
+    </div>
+
+    <!-- Oyun Sonu Modal -->
+    <div id="gameOverModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="gameOverMessage"></h2>
+            <div id="finalScores" style="margin:16px 0;color:var(--text-secondary)"></div>
+            <div class="modal-buttons">
+                <button id="playAgainBtn" class="btn primary">Tekrar Oyna</button>
+                <button id="exitBtn" class="btn ghost">Çıkış</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kurallar Modal -->
+    <div id="rulesModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Go Kuralları</h2>
+            <div class="rules-text">
+                <p><strong>Amaç:</strong> Rakipten daha fazla alan kontrol etmek.</p>
+                <br>
+                <p><strong>Temel Kurallar:</strong></p>
+                <ul style="margin-left:20px;margin-top:8px">
+                    <li>Siyah başlar, sırayla taş koyulur</li>
+                    <li>Taşlar kesişim noktalarına konur</li>
+                    <li>Nefesi (boş komşusu) kalmayan taşlar esir alınır</li>
+                    <li>Ko: Anlık tekrarlayan pozisyon yasak</li>
+                    <li>İki oyuncu da pas geçerse oyun biter</li>
+                </ul>
+                <br>
+                <p><strong>Puanlama:</strong> Alan + Esir sayısı</p>
+            </div>
+            <div class="modal-buttons" style="margin-top:20px">
+                <button id="closeRulesBtn" class="btn primary">Anladım</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>

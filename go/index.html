@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Go (Baduk) — Strateji Oyunu</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="page">
+        <header class="brand">
+            <h1>GO (BADUK)</h1>
+            <p class="subtitle">Dünyanın En Eski Strateji Oyunu</p>
+        </header>
+
+        <main class="card center-card">
+            <!-- Tahta Boyutu -->
+            <label class="label">Tahta Boyutu</label>
+            <div class="game-mode-selector">
+                <button id="size9" class="mode-btn active">9×9</button>
+                <button id="size13" class="mode-btn">13×13</button>
+                <button id="size19" class="mode-btn">19×19</button>
+            </div>
+
+            <div class="form-section">
+                <div class="section-title">Oyun Modu</div>
+
+                <div class="game-mode-selector">
+                    <button id="modeLocal" class="mode-btn active">2 Kişi</button>
+                    <button id="modeSingle" class="mode-btn">Bilgisayara Karşı</button>
+                </div>
+
+                <div id="aiDifficultyRow" style="display:none">
+                    <label class="label">Zorluk</label>
+                    <div class="difficulty-selector">
+                        <button id="diffEasy" class="mode-btn active">Kolay</button>
+                        <button id="diffMedium" class="mode-btn">Orta</button>
+                    </div>
+                </div>
+
+                <label class="label">Oyuncu İsimleri</label>
+                <div class="player-inputs">
+                    <input id="player1Name" class="input" value="Siyah" placeholder="Siyah Taş" />
+                    <input id="player2Name" class="input" value="Beyaz" placeholder="Beyaz Taş" />
+                </div>
+            </div>
+
+            <button id="startGameBtn" class="btn primary" style="margin-top:24px">Oyuna Başla</button>
+            <button class="btn ghost" style="margin-top:12px" onclick="location.href='../index.html'">Ana Sayfa</button>
+        </main>
+
+        <footer class="footer">© Cem YILDIZ</footer>
+    </div>
+
+    <script>
+        // Tahta Boyutu Seçimi
+        const sizeButtons = [
+            document.getElementById('size9'),
+            document.getElementById('size13'),
+            document.getElementById('size19')
+        ];
+        let selectedSize = 9;
+
+        sizeButtons.forEach((btn, idx) => {
+            btn.addEventListener('click', () => {
+                sizeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedSize = [9, 13, 19][idx];
+            });
+        });
+
+        // Oyun Modu Seçimi
+        const modeLocal = document.getElementById('modeLocal');
+        const modeSingle = document.getElementById('modeSingle');
+        const aiDifficultyRow = document.getElementById('aiDifficultyRow');
+        const player2Input = document.getElementById('player2Name');
+
+        let isSinglePlayer = false;
+
+        modeLocal.addEventListener('click', () => {
+            modeLocal.classList.add('active');
+            modeSingle.classList.remove('active');
+            aiDifficultyRow.style.display = 'none';
+            player2Input.disabled = false;
+            player2Input.value = 'Beyaz';
+            isSinglePlayer = false;
+        });
+
+        modeSingle.addEventListener('click', () => {
+            modeSingle.classList.add('active');
+            modeLocal.classList.remove('active');
+            aiDifficultyRow.style.display = 'block';
+            player2Input.disabled = true;
+            player2Input.value = 'Bilgisayar';
+            isSinglePlayer = true;
+        });
+
+        // Zorluk Seçimi
+        const diffEasy = document.getElementById('diffEasy');
+        const diffMedium = document.getElementById('diffMedium');
+        let difficulty = 'easy';
+
+        diffEasy.addEventListener('click', () => {
+            diffEasy.classList.add('active');
+            diffMedium.classList.remove('active');
+            difficulty = 'easy';
+        });
+
+        diffMedium.addEventListener('click', () => {
+            diffMedium.classList.add('active');
+            diffEasy.classList.remove('active');
+            difficulty = 'medium';
+        });
+
+        // Oyuna Başla
+        document.getElementById('startGameBtn').addEventListener('click', () => {
+            const p1 = document.getElementById('player1Name').value || 'Siyah';
+            const p2 = document.getElementById('player2Name').value || 'Beyaz';
+
+            const params = new URLSearchParams({
+                size: selectedSize,
+                p1: p1,
+                p2: p2,
+                mode: isSinglePlayer ? 'ai' : 'local',
+                diff: difficulty
+            });
+
+            location.href = 'game.html?' + params.toString();
+        });
+    </script>
+</body>
+
+</html>

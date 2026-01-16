@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Çizgi Savaşları — Oyun</title>
+	<link rel="stylesheet" href="../style.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+	<div class="page">
+		<header class="game-header">
+			<div class="info">
+				<div style="display:flex;gap:10px;align-items:baseline">
+					<h2 id="gameTitle">Çizgi Savaşları</h2>
+					<span id="gridSizeDisplay" style="color:var(--text-muted);font-size:13px"></span>
+				</div>
+				<div id="status" class="status">Yükleniyor...</div>
+			</div>
+			<div id="timerContainer" class="timer-container hidden">
+				<div id="timerDisplay" class="timer-display">10</div>
+				<div id="timerBar" class="timer-bar">
+					<div id="timerProgress" class="timer-progress"></div>
+				</div>
+			</div>
+			<div id="scoreboard" class="scoreboard hidden">
+				<div id="p1Score">Oyuncu 1: 0</div>
+				<div id="p2Score">Oyuncu 2: 0</div>
+			</div>
+			<div class="controls">
+				<button class="small-btn" onclick="location.href='../index.html'">Geri</button>
+				<button class="small-btn" id="resetGameBtn">Yeniden</button>
+			</div>
+		</header>
+
+		<div class="canvas-wrap card">
+			<canvas id="gameCanvas"></canvas>
+		</div>
+
+		<footer id="footerInfo" class="footer"></footer>
+	</div>
+
+	<!-- Oyun Sonu Modal -->
+	<div id="gameOverModal" class="modal-overlay hidden">
+		<div class="modal-content">
+			<h2 id="gameOverMessage"></h2>
+			<div class="modal-buttons">
+				<button id="playAgainBtn" class="btn primary">Tekrar Oyna</button>
+				<button id="exitBtn" class="btn ghost">Çıkış</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Kurallar Modal -->
+	<div id="rulesModal" class="modal-overlay hidden">
+		<div class="modal-content">
+			<h2 id="rulesTitle">Oyun Kuralları</h2>
+			<div id="rulesContent" class="rules-text"></div>
+			<div class="modal-buttons" style="margin-top:20px">
+				<button id="closeRulesBtn" class="btn primary">Anladım</button>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+	<script>
+		const firebaseConfig = {
+			apiKey: "AIzaSyCbCrS4ku7_E5qEUqAbFGLjDq3tyD9Tdnw",
+			authDomain: "cizgisavaslari-98312.firebaseapp.com",
+			databaseURL: "https://cizgisavaslari-98312-default-rtdb.firebaseio.com",
+			projectId: "cizgisavaslari-98312",
+			storageBucket: "cizgisavaslari-98312.appspot.com",
+			messagingSenderId: "236401267419",
+			appId: "1:236401267419:web:1e2f9efaba97ad08b532fe"
+		};
+
+		firebase.initializeApp(firebaseConfig);
+		const database = firebase.database();
+	</script>
+	<script src="game.js"></script>
+</body>
+
+</html>

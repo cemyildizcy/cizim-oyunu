@@ -1,162 +1,399 @@
-:root{
-	--bg:#0f1724;
-	--card:#0b1220;
-	--muted:#98a0b3;
-	--accent:#4f46e5;
-	--accent-2:#06b6d4;
-	--success:#16a34a;
-	--danger:#ef4444;
-	--glass: rgba(255,255,255,0.03);
-	--radius:12px;
-	font-size:16px;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-	margin:0;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-	background: linear-gradient(180deg,#071021 0%,#081225 60%);
-	color:#e6eef6;
-	display:flex;
-	align-items:center;
-	justify-content:center;
-	padding:24px;
-	transition: background 0.4s ease; /* Arkaplan geçişi için eklendi */
-}
+/* ================================================
+   ÇİZGİ SAVAŞLARI - MODERN REKABETÇİ TEMA
+   Minimalist • Temiz • Hızlı
+   ================================================ */
 
-/* YENİ: Hamle sırası oyuncudayken arkaplanı parlatan sınıf */
-body.my-turn {
-	background: radial-gradient(ellipse at center, rgba(22, 163, 74, 0.15) 0%, var(--bg) 65%);
-}
+:root {
+	/* Renk Paleti */
+	--bg-primary: #0a0a0a;
+	--bg-secondary: #141414;
+	--bg-card: #1c1c1c;
+	--bg-hover: #252525;
 
+	--accent-1: #6366f1;
+	/* İndigo - Oyuncu 1 */
+	--accent-2: #f97316;
+	/* Turuncu - Oyuncu 2 */
+	--success: #22c55e;
+	--danger: #ef4444;
 
-/* Genel sayfa yapısı */
-.page{width:100%;max-width:1100px}
-.brand{text-align:center;margin-bottom:18px}
-.brand h1{margin:0;font-size:28px;letter-spacing:0.2px}
-.brand .subtitle{margin:6px 0 0;color:var(--muted);font-size:13px}
+	--text: #ffffff;
+	--text-secondary: #a1a1aa;
+	--text-muted: #52525b;
 
-/* Kart */
-.card{
-	background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-	border:1px solid rgba(255,255,255,0.04);
-	padding:18px;
-	border-radius:var(--radius);
-	box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+	--border: #27272a;
+	--border-light: #3f3f46;
+
+	--radius: 12px;
+	--radius-sm: 8px;
+	--transition: 0.2s ease;
+
+	font-size: 16px;
 }
 
-/* Landing */
-.center-card{max-width:420px;margin:0 auto;text-align:center}
-.label{display:block;margin-bottom:8px;color:var(--muted)}
-.input{
-	width:100%;
-	padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);
-	background:transparent;color:var(--accent-2);font-weight:600;font-size:16px;
-	margin-bottom:12px;
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html,
+body {
+	height: 100%;
+}
+
+body {
+	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	background: var(--bg-primary);
+	color: var(--text);
+	min-height: 100vh;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* ================================================
+   LAYOUT
+   ================================================ */
+
+.page {
+	max-width: 480px;
+	margin: 0 auto;
+	padding: 24px 16px;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+/* ================================================
+   HEADER / BRAND
+   ================================================ */
+
+.brand {
 	text-align: center;
+	padding: 32px 0;
 }
+
+.brand h1 {
+	font-size: 28px;
+	font-weight: 700;
+	letter-spacing: -0.5px;
+	color: var(--text);
+	margin-bottom: 8px;
+}
+
+.brand .subtitle {
+	font-size: 14px;
+	color: var(--text-muted);
+}
+
+/* ================================================
+   CARDS
+   ================================================ */
+
+.card {
+	background: var(--bg-card);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	padding: 24px;
+}
+
+.center-card {
+	margin: 0 auto;
+	width: 100%;
+}
+
+/* ================================================
+   FORM ELEMENTS
+   ================================================ */
+
+.label {
+	display: block;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--text-muted);
+	margin-bottom: 8px;
+}
+
+.input {
+	width: 100%;
+	padding: 12px 16px;
+	background: var(--bg-secondary);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	color: var(--text);
+	font-size: 15px;
+	font-weight: 500;
+	transition: border-color var(--transition), background var(--transition);
+}
+
+.input:focus {
+	outline: none;
+	border-color: var(--accent-1);
+	background: var(--bg-primary);
+}
+
+.input:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* ================================================
+   GAME MODE SELECTOR
+   ================================================ */
+
 .game-mode-selector {
 	display: flex;
-	background: rgba(255,255,255,0.03);
-	border-radius: 8px;
-	padding: 4px;
-	margin-bottom: 12px;
+	gap: 8px;
+	margin-bottom: 16px;
 }
+
 .mode-btn {
 	flex: 1;
-	padding: 8px;
-	border: 0;
-	background: transparent;
-	color: var(--muted);
-	border-radius: 6px;
-	cursor: pointer;
-	transition: background 0.2s ease, color 0.2s ease;
-}
-.mode-btn.active {
-	background: var(--accent);
-	color: white;
+	padding: 12px 16px;
+	background: var(--bg-secondary);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	color: var(--text-secondary);
+	font-size: 14px;
 	font-weight: 600;
+	cursor: pointer;
+	transition: all var(--transition);
 }
-.player-inputs {
-	display: flex;
-	gap: 10px;
-}
-.player-inputs {
-	display:flex;gap:8px;
-}
-@media (max-width:640px){
-	.player-inputs{flex-direction:column}
-}
-.row{display:flex;gap:8px;justify-content:center}
-.btn{
-	width: 100%;
-	padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600;
-}
-.btn.primary{background:linear-gradient(90deg,var(--accent),#7c3aed);color:white}
-.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--muted)}
-.hint{display:block;margin-top:10px;color:var(--muted);font-size:13px}
 
-/* Game page layout */
-.game-header{
-	display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;
+.mode-btn:hover:not(.active) {
+	background: var(--bg-hover);
+	border-color: var(--border-light);
+	color: var(--text);
 }
-.info{display:flex;flex-direction:column;}
-.info .status{font-weight:600}
+
+.mode-btn.active {
+	background: var(--accent-1);
+	border-color: var(--accent-1);
+	color: white;
+}
+
+/* ================================================
+   DIFFICULTY SELECTOR
+   ================================================ */
+
+.difficulty-selector {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+.difficulty-selector .mode-btn.active {
+	background: var(--accent-2);
+	border-color: var(--accent-2);
+}
+
+/* ================================================
+   PLAYER INPUTS
+   ================================================ */
+
+.player-inputs {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+@media (max-width: 480px) {
+	.player-inputs {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ================================================
+   BUTTONS
+   ================================================ */
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 14px 24px;
+	border-radius: var(--radius-sm);
+	font-size: 15px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all var(--transition);
+	border: none;
+}
+
+.btn.primary {
+	background: var(--accent-1);
+	color: white;
+	width: 100%;
+}
+
+.btn.primary:hover {
+	background: #4f46e5;
+	transform: translateY(-1px);
+}
+
+.btn.primary:active {
+	transform: translateY(0);
+}
+
+.btn.ghost {
+	background: transparent;
+	border: 1px solid var(--border);
+	color: var(--text-secondary);
+	width: 100%;
+}
+
+.btn.ghost:hover {
+	background: var(--bg-hover);
+	border-color: var(--border-light);
+	color: var(--text);
+}
+
+.small-btn {
+	padding: 10px 16px;
+	background: var(--bg-secondary);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	color: var(--text-secondary);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all var(--transition);
+}
+
+.small-btn:hover {
+	background: var(--bg-hover);
+	color: var(--text);
+}
+
+/* ================================================
+   FORM SECTIONS
+   ================================================ */
+
+.form-section {
+	margin-top: 24px;
+	padding-top: 24px;
+	border-top: 1px solid var(--border);
+}
+
+.section-title {
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	color: var(--accent-1);
+	margin-bottom: 16px;
+}
+
+/* ================================================
+   GAME PAGE HEADER
+   ================================================ */
+
+.game-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 16px 0;
+	flex-wrap: wrap;
+}
+
+.info {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.info h2 {
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.status {
+	font-size: 14px;
+	color: var(--text-secondary);
+	font-weight: 500;
+}
+
+.controls {
+	display: flex;
+	gap: 8px;
+}
+
+/* ================================================
+   SCOREBOARD
+   ================================================ */
+
 .scoreboard {
-	padding: 8px 12px;
-	text-align: center;
+	display: flex;
+	gap: 24px;
+	padding: 16px 24px;
+	background: var(--bg-secondary);
+	border-radius: var(--radius-sm);
+	justify-content: center;
 }
+
 .scoreboard.hidden {
 	display: none;
 }
+
 .scoreboard div {
+	font-size: 15px;
 	font-weight: 600;
-	font-size: 14px;
 }
-.controls{display:flex;gap:8px}
-.small-btn{padding:8px 10px;border-radius:8px;border:0;background:rgba(255,255,255,0.03);color:var(--muted);cursor:pointer}
 
-/* Canvas container */
-.canvas-wrap{
-	display:flex;
-	justify-content:center;
-	align-items:center;
-	margin-top:8px;
-	padding: 12px;
+#p1Score {
+	color: var(--accent-1);
 }
-#gameCanvas{
-	/* Normalde beyaz arka plan: ızgara net beyaz görünmeli */
-	background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-	border-radius:10px;
-	box-shadow: 0 8px 30px rgba(2,6,23,0.6);
-	border:1px solid rgba(2,6,23,0.06);
+
+#p2Score {
+	color: var(--accent-2);
+}
+
+/* ================================================
+   CANVAS
+   ================================================ */
+
+.canvas-wrap {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 24px;
+	margin: 16px 0;
+}
+
+#gameCanvas {
+	background: #fafafa;
+	border-radius: var(--radius);
 	cursor: crosshair;
-	transition: box-shadow 0.25s ease, transform 0.12s ease;
+	max-width: 100%;
+	transition: box-shadow var(--transition);
 }
 
-/* Sadece sıra sizdeyken canvas etrafında yeşil "yanan ışık" etkisi */
+/* Sıra göstergesi */
 body.my-turn #gameCanvas {
-	/* hafif yeşil glow */
-	box-shadow:
-		0 8px 40px rgba(16,185,129,0.18),
-		0 0 60px rgba(16,185,129,0.14) inset,
-		0 2px 12px rgba(16,185,129,0.08);
-	transform: translateY(-2px);
+	box-shadow: 0 0 0 3px var(--accent-1);
 }
 
-/* Game Over Modal */
+body.ai-turn #gameCanvas {
+	box-shadow: 0 0 0 3px var(--accent-2);
+}
+
+/* ================================================
+   MODAL
+   ================================================ */
+
 .modal-overlay {
 	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(15, 23, 36, 0.8);
-	backdrop-filter: blur(5px);
+	inset: 0;
+	background: rgba(0, 0, 0, 0.85);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	z-index: 1000;
+	padding: 24px;
 	opacity: 1;
 	transition: opacity 0.3s ease;
 }
@@ -167,72 +404,236 @@ body.my-turn #gameCanvas {
 }
 
 .modal-content {
-	background: var(--card);
-	padding: 24px 32px;
+	background: var(--bg-card);
+	border: 1px solid var(--border);
 	border-radius: var(--radius);
+	padding: 32px;
+	max-width: 400px;
+	width: 100%;
 	text-align: center;
-	border: 1px solid rgba(255, 255, 255, 0.06);
-	animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-	max-width: 500px; /* Kurallar için daha geniş olabilir */
-	max-height: 80vh; /* Yüksekliği sınırlayın */
-	overflow-y: auto; /* İçerik taşarsa kaydırma çubuğu */
+	animation: modalIn 0.3s ease;
+}
+
+@keyframes modalIn {
+	from {
+		opacity: 0;
+		transform: scale(0.95) translateY(10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
 }
 
 .modal-content h2 {
-	margin: 0 0 16px;
-	color: white;
+	font-size: 22px;
+	font-weight: 700;
+	margin-bottom: 24px;
+	color: var(--text);
 }
 
 .modal-buttons {
 	display: flex;
-	gap: 10px;
-	justify-content: center;
+	gap: 12px;
+	margin-top: 24px;
 }
 
-.modal-content .btn {
-	width: auto;
-	padding: 10px 24px;
+.modal-buttons .btn {
+	flex: 1;
+	padding: 12px 16px;
+	font-size: 14px;
 }
+
+/* ================================================
+   RULES TEXT
+   ================================================ */
 
 .rules-text {
 	text-align: left;
 	font-size: 14px;
-	line-height: 1.6;
-	color: var(--muted);
-}
-.rules-text strong {
-	color: white;
-}
-.rules-text ul {
-	padding-left: 20px;
-	margin-top: 10px;
-}
-.rules-text li {
-	margin-bottom: 5px;
+	line-height: 1.7;
+	color: var(--text-secondary);
 }
 
-@keyframes zoomIn {
-	from {
-		opacity: 0;
-		transform: scale(0.8);
+.rules-text h3 {
+	color: var(--text);
+	font-size: 16px;
+	margin: 16px 0 8px 0;
+}
+
+.rules-text ul {
+	padding-left: 20px;
+	margin: 8px 0;
+}
+
+.rules-text li {
+	margin-bottom: 6px;
+}
+
+/* ================================================
+   LEADERBOARD
+   ================================================ */
+
+#leaderboardContent ul {
+	list-style: none;
+}
+
+#leaderboardContent li {
+	display: flex;
+	justify-content: space-between;
+	padding: 12px 16px;
+	background: var(--bg-secondary);
+	border-radius: var(--radius-sm);
+	margin-bottom: 8px;
+	font-weight: 600;
+}
+
+#leaderboardContent li:nth-child(1) {
+	background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+	color: #000;
+}
+
+#leaderboardContent li:nth-child(2) {
+	background: var(--bg-hover);
+	color: #d4d4d8;
+}
+
+#leaderboardContent li:nth-child(3) {
+	background: var(--bg-hover);
+	color: #a78bfa;
+}
+
+/* ================================================
+   FOOTER
+   ================================================ */
+
+.footer {
+	margin-top: auto;
+	padding: 24px 0;
+	text-align: center;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+/* ================================================
+   CHECKBOX STYLING
+   ================================================ */
+
+input[type="checkbox"] {
+	width: 18px;
+	height: 18px;
+	accent-color: var(--accent-1);
+	cursor: pointer;
+}
+
+/* ================================================
+   RESPONSIVE
+   ================================================ */
+
+@media (max-width: 480px) {
+	.page {
+		padding: 16px 12px;
 	}
-	to {
+
+	.brand h1 {
+		font-size: 24px;
+	}
+
+	.card {
+		padding: 20px;
+	}
+
+	.game-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.modal-content {
+		padding: 24px;
+	}
+}
+
+/* ================================================
+   UTILITIES
+   ================================================ */
+
+.hidden {
+	display: none !important;
+}
+
+.row {
+	display: flex;
+	gap: 8px;
+}
+
+/* ================================================
+   TIMER
+   ================================================ */
+
+.timer-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	background: var(--bg-secondary);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	min-width: 80px;
+}
+
+.timer-display {
+	font-size: 24px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	color: var(--accent-1);
+	transition: color 0.3s ease;
+}
+
+.timer-display.warning {
+	color: var(--accent-2);
+}
+
+.timer-display.danger {
+	color: var(--danger);
+	animation: pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+	0%,
+	100% {
 		opacity: 1;
 		transform: scale(1);
 	}
+
+	50% {
+		opacity: 0.7;
+		transform: scale(1.1);
+	}
 }
 
-/* footer */
-.footer{opacity:0.6;margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
-
-/* Responsive */
-@media (max-width:640px){
-	.center-card{padding:14px}
-	.brand h1{font-size:22px}
+.timer-bar {
+	width: 60px;
+	height: 4px;
+	background: var(--border);
+	border-radius: 2px;
+	overflow: hidden;
 }
 
-/* Yeni: giriş formu bölümleri için düzen ve açıklama */
-.form-section { margin-top: 12px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.03); }
-.section-title { font-weight:700;color:rgb(110, 243, 100);margin-bottom:8px;font-size:14px; }
-.form-row { display:flex;flex-direction:column;gap:8px;margin-bottom:8px;align-items:stretch; }
-.helper { color:var(--muted); font-size:12px; margin-top:2px; }
+.timer-progress {
+	height: 100%;
+	background: var(--accent-1);
+	border-radius: 2px;
+	width: 100%;
+	transition: width 0.1s linear, background-color 0.3s ease;
+}
+
+.timer-progress.warning {
+	background: var(--accent-2);
+}
+
+.timer-progress.danger {
+	background: var(--danger);
+}
