@@ -414,38 +414,86 @@ function aiFire() {
     if (gamePhase !== 'battle' || currentPlayer !== 2) return;
 
     let x, y;
+    let delay;
 
-    if (aiDifficulty === 'hard' && aiHuntQueue.length > 0) {
-        // Zor mod: Akıllı av
-        [x, y] = aiHuntQueue.shift();
-    } else if (aiDifficulty === 'medium' && aiHuntQueue.length > 0 && Math.random() > 0.3) {
-        // Orta mod: Bazen akıllı
-        [x, y] = aiHuntQueue.shift();
+    // Zorluk seviyesine göre gecikme
+    if (aiDifficulty === 'easy') {
+        delay = 1200;
+    } else if (aiDifficulty === 'medium') {
+        delay = 700;
     } else {
-        // Rastgele ateş (dama deseni)
-        const available = [];
+        delay = 400;
+    }
+
+    // Akıllı hamle mi rastgele mi?
+    let useSmartMove = false;
+    if (aiDifficulty === 'easy') {
+        // KOLAY: %20 akıllı, %80 rastgele
+        useSmartMove = Math.random() < 0.2;
+    } else if (aiDifficulty === 'medium') {
+        // ORTA: %70 akıllı, %30 rastgele
+        useSmartMove = Math.random() < 0.7;
+    } else {
+        // ZOR: %95 akıllı, %5 rastgele
+        useSmartMove = Math.random() < 0.95;
+    }
+
+    if (useSmartMove && aiHuntQueue.length > 0) {
+        // Akıllı av modu - önceki isabetten devam et
+        [x, y] = aiHuntQueue.shift();
+        // Geçersizse bir sonrakini dene
+        while (playerBoard[y] && playerBoard[y][x] && playerBoard[y][x].hit && aiHuntQueue.length > 0) {
+            [x, y] = aiHuntQueue.shift();
+        }
+        if (playerBoard[y] && playerBoard[y][x] && playerBoard[y][x].hit) {
+            // Tüm av hedefleri vurulmuş, rastgele hedef seç
+            [x, y] = getRandomTarget();
+        }
+    } else {
+        [x, y] = getRandomTarget();
+    }
+
+    setTimeout(() => {
+        executeAIFire(x, y);
+    }, delay);
+}
+
+function getRandomTarget() {
+    const available = [];
+    const useCheckerboard = aiDifficulty !== 'easy';
+
+    for (let cy = 0; cy < boardSize; cy++) {
+        for (let cx = 0; cx < boardSize; cx++) {
+            if (!playerBoard[cy][cx].hit) {
+                // Zor modda dama deseni kullan (daha verimli)
+                if (useCheckerboard) {
+                    if ((cx + cy) % 2 === 0) {
+                        available.push([cx, cy]);
+                    }
+                } else {
+                    available.push([cx, cy]);
+                }
+            }
+        }
+    }
+
+    // Dama hücreleri bittiyse geri kalanları dene
+    if (available.length === 0) {
         for (let cy = 0; cy < boardSize; cy++) {
             for (let cx = 0; cx < boardSize; cx++) {
                 if (!playerBoard[cy][cx].hit) {
-                    // Dama deseni (daha verimli)
-                    if ((cx + cy) % 2 === 0 || aiDifficulty === 'easy') {
-                        available.push([cx, cy]);
-                    }
+                    available.push([cx, cy]);
                 }
             }
         }
-        if (available.length === 0) {
-            // Tüm dama hücreleri vuruldu, geri kalanları dene
-            for (let cy = 0; cy < boardSize; cy++) {
-                for (let cx = 0; cx < boardSize; cx++) {
-                    if (!playerBoard[cy][cx].hit) {
-                        available.push([cx, cy]);
-                    }
-                }
-            }
-        }
-        [x, y] = available[Math.floor(Math.random() * available.length)];
     }
+
+    if (available.length === 0) return [0, 0];
+    return available[Math.floor(Math.random() * available.length)];
+}
+
+function executeAIFire(x, y) {
+    if (gamePhase !== 'battle' || currentPlayer !== 2) return;
 
     const cell = playerBoard[y][x];
     cell.hit = true;
@@ -454,8 +502,13 @@ function aiFire() {
         cell.ship.hits++;
         statusDiv.textContent = `${player2Name}: İsabet! 🎯`;
 
-        // Akıllı avlama için komşuları ekle
-        if (aiDifficulty !== 'easy') {
+        // Akıllı avlama için komşuları ekle (kolay modda bile bazen akıllı ol)
+        const shouldAddTargets =
+            aiDifficulty === 'hard' ||
+            (aiDifficulty === 'medium' && Math.random() < 0.8) ||
+            (aiDifficulty === 'easy' && Math.random() < 0.3);
+
+        if (shouldAddTargets) {
             addHuntTargets(x, y);
         }
 
@@ -480,7 +533,8 @@ function aiFire() {
         }
 
         // AI tekrar ateş eder
-        setTimeout(aiFire, 600);
+        const nextDelay = aiDifficulty === 'easy' ? 1000 : (aiDifficulty === 'medium' ? 600 : 300);
+        setTimeout(aiFire, nextDelay);
         return;
     } else {
         statusDiv.textContent = `${player2Name}: Iskaladı! 💨`;
@@ -496,6 +550,29 @@ function aiFire() {
 
 function addHuntTargets(x, y) {
     const directions = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+
+    // Zor modda yön takibi yap
+    if (aiDifficulty === 'hard' && aiHuntQueue.length > 0) {
+        // Önceki isabetten yön belirle
+        const lastTarget = aiHuntQueue[aiHuntQueue.length - 1];
+        if (lastTarget) {
+            const dx = x - lastTarget[0];
+            const dy = y - lastTarget[1];
+            // Aynı yönde devam et
+            if (dx !== 0 || dy !== 0) {
+                const nextX = x + (dx || 0);
+                const nextY = y + (dy || 0);
+                if (nextX >= 0 && nextX < boardSize && nextY >= 0 && nextY < boardSize) {
+                    if (!playerBoard[nextY][nextX].hit) {
+                        // Yön takibini öncelikli yap
+                        aiHuntQueue.unshift([nextX, nextY]);
+                    }
+                }
+            }
+        }
+    }
+
+    // Normal komşuları ekle
     directions.forEach(([dx, dy]) => {
         const nx = x + dx;
         const ny = y + dy;

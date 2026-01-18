@@ -1157,22 +1157,35 @@ function scheduleAIMoveIfNeeded() {
 	let delay, getMove;
 
 	if (aiDifficulty === 'easy') {
-		delay = 1200;
-		getMove = pickRandomMove;
-	} else if (aiDifficulty === 'medium') {
-		delay = 700;
+		// KOLAY: Çok yavaş, %80 rastgele, %20 akıllı
+		delay = 1500;
 		getMove = (state) => {
-			if (state.gameType === 'square') {
-				return Math.random() < 0.6 ? getBestSquareMove(state) : pickRandomMove(state);
-			} else {
-				return Math.random() < 0.6 ? getBestPathMove(state) : pickRandomMove(state);
+			if (Math.random() < 0.2) {
+				// %20 ihtimalle akıllı hamle
+				if (state.gameType === 'square') return getBestSquareMove(state);
+				return getBestPathMove(state);
 			}
+			return pickRandomMove(state);
+		};
+	} else if (aiDifficulty === 'medium') {
+		// ORTA: Normal hız, %70 akıllı, %30 rastgele
+		delay = 800;
+		getMove = (state) => {
+			if (Math.random() < 0.7) {
+				if (state.gameType === 'square') return getBestSquareMove(state);
+				return getBestPathMove(state);
+			}
+			return pickRandomMove(state);
 		};
 	} else {
-		delay = 400;
+		// ZOR: Çok hızlı, %95 akıllı (neredeyse mükemmel)
+		delay = 300;
 		getMove = (state) => {
-			if (state.gameType === 'square') return getBestSquareMove(state);
-			return getBestPathMove(state);
+			if (Math.random() < 0.95) {
+				if (state.gameType === 'square') return getBestSquareMove(state);
+				return getBestPathMove(state);
+			}
+			return pickRandomMove(state);
 		};
 	}
 

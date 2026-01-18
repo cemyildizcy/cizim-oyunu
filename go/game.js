@@ -376,35 +376,168 @@ function makeAIMove() {
     }
 
     let move;
+    let delay;
+
     if (aiDifficulty === 'easy') {
-        // Rastgele hamle
-        move = validMoves[Math.floor(Math.random() * validMoves.length)];
+        // KOLAY: Yavaş, %80 rastgele, %20 akıllı
+        delay = 1200;
+        if (Math.random() < 0.2) {
+            move = findBestMove(validMoves);
+        } else {
+            move = validMoves[Math.floor(Math.random() * validMoves.length)];
+        }
+    } else if (aiDifficulty === 'medium') {
+        // ORTA: Normal hız, %70 akıllı
+        delay = 700;
+        if (Math.random() < 0.7) {
+            move = findBestMove(validMoves);
+        } else {
+            move = validMoves[Math.floor(Math.random() * validMoves.length)];
+        }
     } else {
-        // Orta: Esir alma veya rastgele
-        move = findCapturingMove(validMoves) || validMoves[Math.floor(Math.random() * validMoves.length)];
+        // ZOR: Hızlı, %95 akıllı
+        delay = 400;
+        if (Math.random() < 0.95) {
+            move = findBestMove(validMoves);
+        } else {
+            move = validMoves[Math.floor(Math.random() * validMoves.length)];
+        }
     }
 
-    makeMove(move[0], move[1]);
+    setTimeout(() => {
+        if (!move) move = validMoves[Math.floor(Math.random() * validMoves.length)];
+        makeMove(move[0], move[1]);
+    }, delay);
 }
 
-function findCapturingMove(moves) {
-    for (const [x, y] of moves) {
-        const tempBoard = board.map(row => [...row]);
-        board[y][x] = currentPlayer;
+function findBestMove(validMoves) {
+    const opponent = currentPlayer === 1 ? 2 : 1;
+    let bestMove = null;
+    let bestScore = -Infinity;
 
-        const opponent = currentPlayer === 1 ? 2 : 1;
-        for (const [nx, ny] of getNeighbors(x, y)) {
-            if (board[ny][nx] === opponent) {
-                const group = getGroup(nx, ny, new Set());
-                if (getLiberties(group) === 0) {
-                    board = tempBoard;
-                    return [x, y];
-                }
+    for (const [x, y] of validMoves) {
+        let score = 0;
+
+        // 1. Esir alma kontrolü (en yüksek öncelik)
+        const captureCount = simulateCapture(x, y);
+        score += captureCount * 100;
+
+        // 2. Kendi gruplarını kurtar
+        const savesGroup = checkIfSavesGroup(x, y);
+        if (savesGroup) score += 80;
+
+        // 3. Rakip grubunu tehdit et (atari)
+        const threatensCapture = checkIfThreatens(x, y);
+        if (threatensCapture) score += 60;
+
+        // 4. Bağlantı kur (kendi taşlarına bitişik)
+        const connections = countOwnNeighbors(x, y);
+        score += connections * 15;
+
+        // 5. Merkeze yakınlık (oyun başında önemli)
+        const stoneCount = countStones();
+        if (stoneCount < boardSize * 2) {
+            const centerDist = Math.abs(x - boardSize / 2) + Math.abs(y - boardSize / 2);
+            score += (boardSize - centerDist) * 5;
+        }
+
+        // 6. Kenarlara ve köşelere yakınlık (genelde kötü)
+        if (x === 0 || x === boardSize - 1 || y === 0 || y === boardSize - 1) {
+            score -= 10;
+        }
+
+        // 7. Alan genişletme (boş komşular iyi)
+        const libertyCount = countEmptyNeighbors(x, y);
+        score += libertyCount * 8;
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestMove = [x, y];
+        }
+    }
+
+    return bestMove || validMoves[Math.floor(Math.random() * validMoves.length)];
+}
+
+function simulateCapture(x, y) {
+    const tempBoard = board.map(row => [...row]);
+    board[y][x] = currentPlayer;
+    const opponent = currentPlayer === 1 ? 2 : 1;
+    let captured = 0;
+
+    for (const [nx, ny] of getNeighbors(x, y)) {
+        if (board[ny][nx] === opponent) {
+            const group = getGroup(nx, ny, new Set());
+            if (getLiberties(group) === 0) {
+                captured += group.length;
             }
         }
-        board = tempBoard;
     }
-    return null;
+
+    board = tempBoard;
+    return captured;
+}
+
+function checkIfSavesGroup(x, y) {
+    // Kendi gruplarımızdan birinin tehlike altında olup olmadığını kontrol et
+    for (const [nx, ny] of getNeighbors(x, y)) {
+        if (board[ny][nx] === currentPlayer) {
+            const group = getGroup(nx, ny, new Set());
+            if (getLiberties(group) === 1) {
+                // Bu grup atari'de, bu hamle kurtarıyor mu?
+                const tempBoard = board.map(row => [...row]);
+                board[y][x] = currentPlayer;
+                const newLiberties = getLiberties(getGroup(nx, ny, new Set()));
+                board = tempBoard;
+                if (newLiberties > 1) return true;
+            }
+        }
+    }
+    return false;
+}
+
+function checkIfThreatens(x, y) {
+    const tempBoard = board.map(row => [...row]);
+    board[y][x] = currentPlayer;
+    const opponent = currentPlayer === 1 ? 2 : 1;
+
+    for (const [nx, ny] of getNeighbors(x, y)) {
+        if (board[ny][nx] === opponent) {
+            const group = getGroup(nx, ny, new Set());
+            if (getLiberties(group) === 1) {
+                board = tempBoard;
+                return true; // Atari!
+            }
+        }
+    }
+    board = tempBoard;
+    return false;
+}
+
+function countOwnNeighbors(x, y) {
+    let count = 0;
+    for (const [nx, ny] of getNeighbors(x, y)) {
+        if (board[ny][nx] === currentPlayer) count++;
+    }
+    return count;
+}
+
+function countEmptyNeighbors(x, y) {
+    let count = 0;
+    for (const [nx, ny] of getNeighbors(x, y)) {
+        if (board[ny][nx] === 0) count++;
+    }
+    return count;
+}
+
+function countStones() {
+    let count = 0;
+    for (let y = 0; y < boardSize; y++) {
+        for (let x = 0; x < boardSize; x++) {
+            if (board[y][x] !== 0) count++;
+        }
+    }
+    return count;
 }
 
 // ================================================
