@@ -617,3 +617,38 @@ input[type="checkbox"] {
 	display: flex;
 	gap: 8px;
 }
+
+/* ================================================
+   FOOTER
+   ================================================ */
+
+.footer {
+	margin-top: 48px;
+	padding: 32px 20px;
+	text-align: center;
+	border-top: 1px solid var(--border);
+}
+
+.footer-links {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 24px;
+	margin-bottom: 16px;
+}
+
+.footer-links a {
+	color: var(--text-muted);
+	text-decoration: none;
+	font-size: 14px;
+	transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+	color: var(--neon-cyan);
+}
+
+.footer-copyright {
+	color: var(--text-muted);
+	font-size: 13px;
+}

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Hakkımızda — cizgisavaslari.com</title>
+    <meta name="description"
+        content="cizgisavaslari.com hakkında bilgi edinin. Ücretsiz online strateji oyunları platformu.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .about-page {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .about-page h1 {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+
+        .about-page .subtitle {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .about-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .about-section h2 {
+            font-size: 1.2rem;
+            color: var(--neon-cyan);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .about-section p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .games-list {
+            display: grid;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .game-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .game-item .emoji {
+            font-size: 32px;
+        }
+
+        .game-item .info h3 {
+            font-size: 16px;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .game-item .info p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--neon-pink);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .developer-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+
+        .developer-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--gradient-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+
+        .developer-info h3 {
+            font-size: 18px;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .developer-info p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .developer-links {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .developer-links a {
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .developer-links a:hover {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: var(--neon-cyan);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page about-page">
+        <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
+
+        <h1>Hakkımızda</h1>
+        <p class="subtitle">Ücretsiz online strateji oyunları platformu</p>
+
+        <div class="about-section">
+            <h2>🎮 Misyonumuz</h2>
+            <p>
+                cizgisavaslari.com, klasik strateji oyunlarını modern ve erişilebilir bir şekilde sunmayı amaçlayan
+                ücretsiz bir oyun platformudur. Herhangi bir indirme veya kayıt gerektirmeden, doğrudan tarayıcınızdan
+                oynayabileceğiniz kaliteli oyunlar sunuyoruz.
+            </p>
+            <p style="margin-top: 16px;">
+                Amacımız, zeka geliştirici ve eğlenceli oyunları herkese ücretsiz olarak ulaştırmak,
+                arkadaşlar ve aileler arasında keyifli vakit geçirme fırsatı yaratmaktır.
+            </p>
+        </div>
+
+        <div class="about-section">
+            <h2>🎯 Oyunlarımız</h2>
+            <p>Platformumuzda farklı strateji oyunları bulunmaktadır:</p>
+
+            <div class="games-list">
+                <div class="game-item">
+                    <span class="emoji">✏️</span>
+                    <div class="info">
+                        <h3>Çizgi Savaşları</h3>
+                        <p>Yol çizme ve kare kapatma modları. Stratejiyle rakibini yen!</p>
+                    </div>
+                </div>
+                <div class="game-item">
+                    <span class="emoji">⚫</span>
+                    <div class="info">
+                        <h3>Go (Baduk)</h3>
+                        <p>Dünyanın en eski strateji oyunu. Binlerce yıllık gelenek.</p>
+                    </div>
+                </div>
+                <div class="game-item">
+                    <span class="emoji">🚢</span>
+                    <div class="info">
+                        <h3>Amiral Battı</h3>
+                        <p>Klasik deniz savaşı. Düşman gemilerini bul ve batır!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h2>✨ Özellikler</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">3+</div>
+                    <div class="stat-label">Oyun</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">%100</div>
+                    <div class="stat-label">Ücretsiz</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Reklam Engeli</div>
+                </div>
+            </div>
+            <p style="margin-top: 24px; text-align: center; color: var(--text-muted); font-size: 14px;">
+                Tek başına veya arkadaşlarınla • Bilgisayara karşı • Çevrimiçi
+            </p>
+        </div>
+
+        <div class="about-section">
+            <h2>👨‍💻 Geliştirici</h2>
+            <p>Bu platform tutkulu bir geliştirici tarafından oluşturulmuştur.</p>
+
+            <div class="developer-card">
+                <div class="developer-avatar">👤</div>
+                <div class="developer-info">
+                    <h3>Cem YILDIZ</h3>
+                    <p>Yazılım Geliştirici</p>
+                    <div class="developer-links">
+                        <a href="mailto:cmyldz112233@gmail.com">📧 E-posta</a>
+                        <a href="https://instagram.com/cemyildizcy" target="_blank" rel="noopener">📸 Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">© Cem YILDIZ</footer>
+</body>
+
+</html>
