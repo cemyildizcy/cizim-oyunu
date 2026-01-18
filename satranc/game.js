@@ -1008,46 +1008,162 @@ function showPromotionModal(color) {
 }
 
 // ================================================
-// YAPAY ZEKA
+// YAPAY ZEKA - ELO BAZLI SİSTEM
+// Kolay: 0-500 ELO, Orta: 500-1500 ELO, Zor: 1500+ ELO
 // ================================================
 
+// Piece-Square Tablolar (Taş konumlandırma değerleri)
+const PAWN_TABLE = [
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [5, 5, 10, 25, 25, 10, 5, 5],
+    [0, 0, 0, 20, 20, 0, 0, 0],
+    [5, -5, -10, 0, 0, -10, -5, 5],
+    [5, 10, 10, -20, -20, 10, 10, 5],
+    [0, 0, 0, 0, 0, 0, 0, 0]
+];
+
+const KNIGHT_TABLE = [
+    [-50, -40, -30, -30, -30, -30, -40, -50],
+    [-40, -20, 0, 0, 0, 0, -20, -40],
+    [-30, 0, 10, 15, 15, 10, 0, -30],
+    [-30, 5, 15, 20, 20, 15, 5, -30],
+    [-30, 0, 15, 20, 20, 15, 0, -30],
+    [-30, 5, 10, 15, 15, 10, 5, -30],
+    [-40, -20, 0, 5, 5, 0, -20, -40],
+    [-50, -40, -30, -30, -30, -30, -40, -50]
+];
+
+const BISHOP_TABLE = [
+    [-20, -10, -10, -10, -10, -10, -10, -20],
+    [-10, 0, 0, 0, 0, 0, 0, -10],
+    [-10, 0, 5, 10, 10, 5, 0, -10],
+    [-10, 5, 5, 10, 10, 5, 5, -10],
+    [-10, 0, 10, 10, 10, 10, 0, -10],
+    [-10, 10, 10, 10, 10, 10, 10, -10],
+    [-10, 5, 0, 0, 0, 0, 5, -10],
+    [-20, -10, -10, -10, -10, -10, -10, -20]
+];
+
+const ROOK_TABLE = [
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [5, 10, 10, 10, 10, 10, 10, 5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [0, 0, 0, 5, 5, 0, 0, 0]
+];
+
+const QUEEN_TABLE = [
+    [-20, -10, -10, -5, -5, -10, -10, -20],
+    [-10, 0, 0, 0, 0, 0, 0, -10],
+    [-10, 0, 5, 5, 5, 5, 0, -10],
+    [-5, 0, 5, 5, 5, 5, 0, -5],
+    [0, 0, 5, 5, 5, 5, 0, -5],
+    [-10, 5, 5, 5, 5, 5, 0, -10],
+    [-10, 0, 5, 0, 0, 0, 0, -10],
+    [-20, -10, -10, -5, -5, -10, -10, -20]
+];
+
+const KING_MIDDLE_TABLE = [
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-20, -30, -30, -40, -40, -30, -30, -20],
+    [-10, -20, -20, -20, -20, -20, -20, -10],
+    [20, 20, 0, 0, 0, 0, 20, 20],
+    [20, 30, 10, 0, 0, 10, 30, 20]
+];
+
+const KING_END_TABLE = [
+    [-50, -40, -30, -20, -20, -30, -40, -50],
+    [-30, -20, -10, 0, 0, -10, -20, -30],
+    [-30, -10, 20, 30, 30, 20, -10, -30],
+    [-30, -10, 30, 40, 40, 30, -10, -30],
+    [-30, -10, 30, 40, 40, 30, -10, -30],
+    [-30, -10, 20, 30, 30, 20, -10, -30],
+    [-30, -30, 0, 0, 0, 0, -30, -30],
+    [-50, -30, -30, -30, -30, -30, -30, -50]
+];
+
+// ELO bazlı AI ayarları
+const AI_SETTINGS = {
+    easy: {
+        elo: 400,           // Ortalama ELO
+        depth: 1,           // Arama derinliği
+        blunderChance: 0.4, // %40 kötü hamle yapma şansı
+        missChance: 0.3,    // %30 en iyi hamleyi kaçırma
+        randomness: 50,     // Değerlendirmeye rastgelelik ekle
+        usePositionTables: false,
+        delay: 1500
+    },
+    medium: {
+        elo: 1000,
+        depth: 2,
+        blunderChance: 0.1,
+        missChance: 0.15,
+        randomness: 15,
+        usePositionTables: true,
+        delay: 800
+    },
+    hard: {
+        elo: 1700,
+        depth: 3,
+        blunderChance: 0.02,
+        missChance: 0.05,
+        randomness: 5,
+        usePositionTables: true,
+        delay: 500
+    }
+};
+
 function getAIDelay() {
-    if (aiDifficulty === 'easy') return 1200;
-    if (aiDifficulty === 'medium') return 700;
-    return 400;
+    return AI_SETTINGS[aiDifficulty].delay;
 }
 
 function makeAIMove() {
     if (gameOver) return;
 
+    const settings = AI_SETTINGS[aiDifficulty];
     const aiColor = playerColor === 'white' ? 'black' : 'white';
     const moves = getAllMoves(aiColor);
 
     if (moves.length === 0) return;
 
+    // Tüm hamleleri değerlendir
+    const scoredMoves = moves.map(move => ({
+        move,
+        score: evaluateMove(move, aiColor, settings.depth, settings.usePositionTables)
+    }));
+
+    // Puana göre sırala (en iyiden en kötüye)
+    scoredMoves.sort((a, b) => b.score - a.score);
+
     let selectedMove;
 
-    if (aiDifficulty === 'easy') {
-        // %20 akıllı, %80 rastgele
-        if (Math.random() < 0.2) {
-            selectedMove = getBestMove(moves, aiColor, 1);
-        } else {
-            selectedMove = moves[Math.floor(Math.random() * moves.length)];
-        }
-    } else if (aiDifficulty === 'medium') {
-        // %70 akıllı
-        if (Math.random() < 0.7) {
-            selectedMove = getBestMove(moves, aiColor, 2);
-        } else {
-            selectedMove = moves[Math.floor(Math.random() * moves.length)];
-        }
-    } else {
-        // %95 akıllı
-        if (Math.random() < 0.95) {
-            selectedMove = getBestMove(moves, aiColor, 3);
-        } else {
-            selectedMove = moves[Math.floor(Math.random() * moves.length)];
-        }
+    // Blunder (çok kötü hamle) kontrolü
+    if (Math.random() < settings.blunderChance && scoredMoves.length > 3) {
+        // Alt yarıdan rastgele seç
+        const bottomHalf = scoredMoves.slice(Math.floor(scoredMoves.length / 2));
+        selectedMove = bottomHalf[Math.floor(Math.random() * bottomHalf.length)].move;
+    }
+    // En iyi hamleyi kaçırma
+    else if (Math.random() < settings.missChance && scoredMoves.length > 1) {
+        // 2. veya 3. en iyi hamleyi seç
+        const index = Math.min(1 + Math.floor(Math.random() * 2), scoredMoves.length - 1);
+        selectedMove = scoredMoves[index].move;
+    }
+    // Normal oyun
+    else {
+        // Rastgelelik ekle ve benzer puanlı hamleler arasından seç
+        const topScore = scoredMoves[0].score;
+        const threshold = topScore - settings.randomness;
+        const goodMoves = scoredMoves.filter(m => m.score >= threshold);
+        selectedMove = goodMoves[Math.floor(Math.random() * goodMoves.length)].move;
     }
 
     makeMove(selectedMove.from.row, selectedMove.from.col, selectedMove.to.row, selectedMove.to.col);
@@ -1065,29 +1181,14 @@ function getAllMoves(color) {
 
             const validMoves = getValidMoves(row, col);
             for (const move of validMoves) {
-                moves.push({ from: { row, col }, to: move });
+                moves.push({ from: { row, col }, to: move, piece });
             }
         }
     }
     return moves;
 }
 
-function getBestMove(moves, color, depth) {
-    let bestMove = moves[0];
-    let bestScore = -Infinity;
-
-    for (const move of moves) {
-        const score = evaluateMove(move, color, depth);
-        if (score > bestScore) {
-            bestScore = score;
-            bestMove = move;
-        }
-    }
-
-    return bestMove;
-}
-
-function evaluateMove(move, color, depth) {
+function evaluateMove(move, color, depth, usePositionTables) {
     const tempBoard = board.map(r => [...r]);
     const tempCastling = JSON.parse(JSON.stringify(castlingRights));
     const tempEnPassant = enPassantSquare;
@@ -1101,42 +1202,115 @@ function evaluateMove(move, color, depth) {
 
     let score = 0;
 
-    // Taş alma değeri
+    // Taş alma değeri (centipawn)
     if (captured) {
-        score += PIECE_VALUES[captured.toLowerCase()] * 10;
+        score += PIECE_VALUES[captured.toLowerCase()] * 100;
     }
 
-    // Merkez kontrolü
-    if (move.to.row >= 3 && move.to.row <= 4 && move.to.col >= 3 && move.to.col <= 4) {
-        score += 5;
+    // Pozisyon değerlendirmesi
+    if (usePositionTables) {
+        score += getPositionScore(color);
+    } else {
+        // Basit merkez kontrolü
+        if (move.to.row >= 3 && move.to.row <= 4 && move.to.col >= 3 && move.to.col <= 4) {
+            score += 10;
+        }
     }
 
     // Şah tehdidi
     const enemyColor = color === 'white' ? 'black' : 'white';
     if (isInCheck(enemyColor)) {
-        score += 30;
+        score += 50;
     }
 
     // Mat kontrolü
     if (!hasLegalMoves(enemyColor) && isInCheck(enemyColor)) {
-        score += 10000;
+        score += 100000;
     }
 
-    // Derinlik > 1 ise rakip hamlelerini değerlendir
+    // Rok bonusu
+    if (piece.toLowerCase() === 'k' && Math.abs(move.to.col - move.from.col) === 2) {
+        score += 60;
+    }
+
+    // Geliştirme bonusu (açılışta)
+    if (fullMoveNumber <= 10) {
+        if (piece.toLowerCase() === 'n' || piece.toLowerCase() === 'b') {
+            if ((color === 'white' && move.from.row === 7) ||
+                (color === 'black' && move.from.row === 0)) {
+                score += 30;
+            }
+        }
+    }
+
+    // Derinlik > 1 ise minimax
     if (depth > 1) {
         const enemyMoves = getAllMoves(enemyColor);
-        let worstEnemyResponse = 0;
-        for (const em of enemyMoves.slice(0, 5)) {
-            const enemyScore = evaluateMove(em, enemyColor, depth - 1);
-            worstEnemyResponse = Math.max(worstEnemyResponse, enemyScore);
+        let bestEnemyScore = -Infinity;
+
+        // Performans için hamle sayısını sınırla
+        const limitedMoves = enemyMoves.slice(0, depth === 3 ? 8 : 12);
+
+        for (const em of limitedMoves) {
+            const enemyScore = evaluateMove(em, enemyColor, depth - 1, usePositionTables);
+            bestEnemyScore = Math.max(bestEnemyScore, enemyScore);
         }
-        score -= worstEnemyResponse * 0.7;
+        score -= bestEnemyScore * 0.9;
     }
 
     // Geri al
     board = tempBoard;
     castlingRights = tempCastling;
     enPassantSquare = tempEnPassant;
+
+    return score;
+}
+
+function getPositionScore(color) {
+    let score = 0;
+    let totalPieces = 0;
+
+    // Toplam taş sayısını hesapla (oyun sonu tespiti için)
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            if (board[row][col]) totalPieces++;
+        }
+    }
+
+    const isEndgame = totalPieces <= 12;
+
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const piece = board[row][col];
+            if (!piece) continue;
+
+            const pieceColor = piece === piece.toUpperCase() ? 'white' : 'black';
+            const pieceType = piece.toLowerCase();
+            const isWhite = pieceColor === 'white';
+
+            // Tabloya göre satır (siyah için ters çevir)
+            const tableRow = isWhite ? row : 7 - row;
+
+            let posValue = 0;
+            switch (pieceType) {
+                case 'p': posValue = PAWN_TABLE[tableRow][col]; break;
+                case 'n': posValue = KNIGHT_TABLE[tableRow][col]; break;
+                case 'b': posValue = BISHOP_TABLE[tableRow][col]; break;
+                case 'r': posValue = ROOK_TABLE[tableRow][col]; break;
+                case 'q': posValue = QUEEN_TABLE[tableRow][col]; break;
+                case 'k': posValue = isEndgame ? KING_END_TABLE[tableRow][col] : KING_MIDDLE_TABLE[tableRow][col]; break;
+            }
+
+            // Materyal değeri
+            const materialValue = PIECE_VALUES[pieceType] * 100;
+
+            if (pieceColor === color) {
+                score += materialValue + posValue;
+            } else {
+                score -= materialValue + posValue;
+            }
+        }
+    }
 
     return score;
 }
