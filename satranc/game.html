@@ -14,20 +14,65 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
         .board-wrapper {
             position: relative;
+            padding: 20px;
         }
 
+        /* Koordinatlar */
+        .coordinates {
+            position: absolute;
+            display: flex;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .coordinates.files {
+            bottom: 2px;
+            left: 20px;
+            right: 20px;
+            justify-content: space-around;
+        }
+
+        .coordinates.ranks {
+            top: 20px;
+            bottom: 20px;
+            left: 2px;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        .coord {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .coordinates.files .coord {
+            height: auto;
+        }
+
+        .coordinates.ranks .coord {
+            width: auto;
+        }
+
+        /* Satranç Tahtası */
         .chess-board {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
             border: 3px solid var(--border);
-            border-radius: 8px;
+            border-radius: 4px;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 60px rgba(168, 85, 247, 0.1);
+            position: relative;
         }
 
         .square {
@@ -36,85 +81,159 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
-            cursor: pointer;
-            transition: all 0.2s;
             position: relative;
+            cursor: pointer;
+            transition: background 0.15s ease;
         }
 
+        /* Neon Tema Renkleri */
         .square.light {
-            background: linear-gradient(135deg, #f0d9b5, #e8c9a5);
+            background: linear-gradient(135deg, #3d3d5c 0%, #4a4a6a 100%);
         }
 
         .square.dark {
-            background: linear-gradient(135deg, #b58863, #a07753);
+            background: linear-gradient(135deg, #252538 0%, #2d2d45 100%);
         }
 
+        /* Seçili Kare */
         .square.selected {
-            background: rgba(255, 45, 149, 0.5) !important;
-            box-shadow: inset 0 0 15px rgba(255, 45, 149, 0.8);
+            background: rgba(168, 85, 247, 0.6) !important;
+            box-shadow: inset 0 0 20px rgba(168, 85, 247, 0.8);
         }
 
+        /* Geçerli Hamle - Boş kare */
         .square.valid-move::after {
             content: '';
             position: absolute;
-            width: 16px;
-            height: 16px;
-            background: rgba(0, 240, 255, 0.6);
+            width: 14px;
+            height: 14px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.8) 0%, rgba(0, 240, 255, 0.4) 100%);
             border-radius: 50%;
             pointer-events: none;
+            animation: pulseMove 1.5s infinite;
         }
 
-        .square.valid-capture {
-            box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.8);
+        @keyframes pulseMove {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
         }
 
+        /* Geçerli Hamle - Alma */
+        .square.valid-capture::after {
+            content: '';
+            position: absolute;
+            width: 46px;
+            height: 46px;
+            border: 4px solid rgba(255, 45, 149, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: pulseCapture 1.5s infinite;
+        }
+
+        @keyframes pulseCapture {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+
+        /* Son Hamle */
         .square.last-move {
-            background: rgba(168, 85, 247, 0.4) !important;
+            background: rgba(168, 85, 247, 0.35) !important;
         }
 
+        /* Şah Durumu */
         .square.check {
-            background: rgba(239, 68, 68, 0.6) !important;
-            animation: checkPulse 1s infinite;
+            background: radial-gradient(circle at center, rgba(239, 68, 68, 0.8), rgba(239, 68, 68, 0.3)) !important;
+            animation: checkPulse 0.8s infinite;
         }
 
         @keyframes checkPulse {
 
             0%,
             100% {
-                box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.5);
+                box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.6);
             }
 
             50% {
-                box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.8);
+                box-shadow: inset 0 0 30px rgba(239, 68, 68, 1);
             }
         }
 
+        /* Taş Stili */
         .piece {
+            font-size: 40px;
             user-select: none;
-            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
-            transition: transform 0.1s;
+            cursor: grab;
+            transition: transform 0.1s ease, filter 0.1s ease;
+            filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.5));
+            z-index: 10;
+        }
+
+        .piece:active {
+            cursor: grabbing;
         }
 
         .square:hover .piece {
             transform: scale(1.1);
+            filter: drop-shadow(3px 3px 5px rgba(0, 0, 0, 0.6));
         }
 
+        .square.selected .piece {
+            transform: scale(1.15) translateY(-3px);
+            filter: drop-shadow(4px 6px 8px rgba(0, 0, 0, 0.7));
+        }
+
+        /* Sürüklenen Taş */
+        .piece.dragging {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+            transform: scale(1.2);
+            filter: drop-shadow(5px 8px 12px rgba(0, 0, 0, 0.8));
+            transition: none;
+        }
+
+        /* Hareket Animasyonu */
+        .piece.moving {
+            transition: left 0.15s ease-out, top 0.15s ease-out;
+        }
+
+        /* Oyuncu Paneli */
         .players-panel {
             display: flex;
             justify-content: space-between;
             width: 100%;
             max-width: 420px;
-            gap: 16px;
+            gap: 12px;
         }
 
         .player-box {
             flex: 1;
-            padding: 16px;
+            padding: 12px 16px;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
         }
 
         .player-box.active {
@@ -122,101 +241,269 @@
             box-shadow: var(--glow-cyan);
         }
 
+        .player-icon {
+            font-size: 28px;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
         .player-name {
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 8px;
+            font-size: 14px;
         }
 
         .player-captures {
-            font-size: 20px;
-            min-height: 28px;
+            font-size: 16px;
+            min-height: 20px;
+            margin-top: 2px;
         }
 
+        .material-advantage {
+            font-size: 12px;
+            color: var(--neon-cyan);
+            font-weight: 600;
+        }
+
+        /* Hamle Geçmişi */
         .move-history {
             max-width: 420px;
             width: 100%;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            padding: 16px;
-            max-height: 120px;
+            padding: 12px 16px;
+            max-height: 100px;
             overflow-y: auto;
         }
 
         .move-history-title {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
             margin-bottom: 8px;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .moves-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            font-size: 13px;
+            gap: 6px;
+            font-size: 12px;
             color: var(--text-secondary);
+            font-family: 'Courier New', monospace;
         }
 
         .move-pair {
             display: flex;
             gap: 4px;
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
         }
 
         .move-number {
             color: var(--text-muted);
         }
 
+        /* Kontrol Butonları */
+        .game-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-btn:hover {
+            border-color: var(--neon-cyan);
+            background: var(--bg-hover);
+        }
+
+        .control-btn.danger:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .control-btn.sound-on {
+            color: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+        }
+
+        /* Piyon Terfi Modal */
         .promotion-modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
 
-        .promotion-options {
-            display: flex;
-            gap: 16px;
+        .promotion-content {
             background: var(--bg-card);
             padding: 24px;
             border-radius: var(--radius);
             border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .promotion-title {
+            color: var(--text);
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .promotion-options {
+            display: flex;
+            gap: 12px;
         }
 
         .promotion-piece {
             width: 60px;
             height: 60px;
-            font-size: 48px;
+            font-size: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             border-radius: 8px;
             background: var(--bg-secondary);
-            transition: all 0.2s;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
         }
 
         .promotion-piece:hover {
             background: var(--neon-purple);
+            border-color: var(--neon-cyan);
             transform: scale(1.1);
+        }
+
+        /* Mat Kutlama */
+        .checkmate-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .checkmate-content {
+            text-align: center;
+            animation: popIn 0.5s ease;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .checkmate-icon {
+            font-size: 80px;
+            margin-bottom: 16px;
+        }
+
+        .checkmate-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .checkmate-subtitle {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 24px;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 1002;
+            animation: confettiFall 3s linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
         }
 
         .page {
             max-width: 600px;
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 500px) {
+            .chess-board {
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(8, 40px);
+            }
+
             .square {
                 width: 40px;
                 height: 40px;
-                font-size: 28px;
+            }
+
+            .piece {
+                font-size: 32px;
+            }
+
+            .coord {
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
@@ -238,19 +525,43 @@
         </header>
 
         <div class="game-container">
+            <!-- Üst Oyuncu (Siyah veya AI) -->
             <div class="players-panel">
-                <div class="player-box" id="whitePlayer">
-                    <div class="player-name" id="whiteName">Beyaz</div>
-                    <div class="player-captures" id="whiteCaptures"></div>
-                </div>
-                <div class="player-box" id="blackPlayer">
-                    <div class="player-name" id="blackName">Siyah</div>
-                    <div class="player-captures" id="blackCaptures"></div>
+                <div class="player-box" id="topPlayer">
+                    <div class="player-icon" id="topIcon">♟️</div>
+                    <div class="player-info">
+                        <div class="player-name" id="topName">Bilgisayar</div>
+                        <div class="player-captures" id="topCaptures"></div>
+                    </div>
+                    <div class="material-advantage" id="topAdvantage"></div>
                 </div>
             </div>
 
             <div class="board-wrapper">
+                <!-- Koordinatlar -->
+                <div class="coordinates ranks" id="rankCoords"></div>
+                <div class="coordinates files" id="fileCoords"></div>
+
                 <div id="chessBoard" class="chess-board"></div>
+            </div>
+
+            <!-- Alt Oyuncu (Beyaz veya Oyuncu) -->
+            <div class="players-panel">
+                <div class="player-box" id="bottomPlayer">
+                    <div class="player-icon" id="bottomIcon">♙</div>
+                    <div class="player-info">
+                        <div class="player-name" id="bottomName">Oyuncu</div>
+                        <div class="player-captures" id="bottomCaptures"></div>
+                    </div>
+                    <div class="material-advantage" id="bottomAdvantage"></div>
+                </div>
+            </div>
+
+            <!-- Kontrol Butonları -->
+            <div class="game-controls">
+                <button class="control-btn" id="flipBoardBtn" title="Tahtayı Döndür">🔄 Döndür</button>
+                <button class="control-btn" id="soundToggle" title="Ses Aç/Kapat">🔊</button>
+                <button class="control-btn danger" id="resignBtn" title="Teslim Ol">🏳️ Teslim</button>
             </div>
 
             <div class="move-history">
@@ -276,13 +587,16 @@
 
     <!-- Piyon Terfi Modal -->
     <div id="promotionModal" class="promotion-modal hidden">
-        <div class="promotion-options" id="promotionOptions"></div>
+        <div class="promotion-content">
+            <div class="promotion-title">Piyonunu terfi ettir!</div>
+            <div class="promotion-options" id="promotionOptions"></div>
+        </div>
     </div>
 
     <!-- Kurallar Modal -->
     <div id="rulesModal" class="modal-overlay">
         <div class="modal-content">
-            <h2>Satranç</h2>
+            <h2>♟️ Satranç</h2>
             <div class="rules-text">
                 <p><strong>Amaç:</strong> Rakibin şahını mat et!</p>
                 <br>
@@ -296,7 +610,7 @@
                     <li>♙ Piyon - İleri 1, çapraz yer</li>
                 </ul>
                 <br>
-                <p><strong>Özel Hamleler:</strong> Rok, Geçerken Alma, Piyon Terfi</p>
+                <p><strong>İpucu:</strong> Taşları sürükleyerek veya tıklayarak hareket ettir!</p>
             </div>
             <div class="modal-buttons" style="margin-top:20px">
                 <button id="closeRulesBtn" class="btn primary">Başla</button>
