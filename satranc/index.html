@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Satranç — Strateji Oyunu</title>
+    <meta name="description" content="Online satranç oyna. Arkadaşınla veya yapay zekaya karşı!">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="page">
+        <header class="brand">
+            <h1>SATRANÇ</h1>
+            <p class="subtitle">Kralların Oyunu</p>
+        </header>
+
+        <main class="card center-card">
+            <div class="form-section">
+                <div class="section-title">Oyun Modu</div>
+
+                <div class="game-mode-selector">
+                    <button id="modeSingle" class="mode-btn active">Bilgisayara Karşı</button>
+                    <button id="modeLocal" class="mode-btn">2 Kişi</button>
+                </div>
+
+                <div id="aiDifficultyRow">
+                    <label class="label">Zorluk</label>
+                    <div class="difficulty-selector">
+                        <button id="diffEasy" class="mode-btn">Kolay</button>
+                        <button id="diffMedium" class="mode-btn active">Orta</button>
+                        <button id="diffHard" class="mode-btn">Zor</button>
+                    </div>
+                </div>
+
+                <div id="colorSelectRow">
+                    <label class="label">Rengin</label>
+                    <div class="game-mode-selector">
+                        <button id="colorWhite" class="mode-btn active">⬜ Beyaz</button>
+                        <button id="colorBlack" class="mode-btn">⬛ Siyah</button>
+                    </div>
+                </div>
+
+                <label class="label">Oyuncu İsimleri</label>
+                <div class="player-inputs">
+                    <input id="player1Name" class="input" value="Oyuncu" placeholder="Senin İsmin" />
+                    <input id="player2Name" class="input" value="Bilgisayar" disabled />
+                </div>
+            </div>
+
+            <button id="startGameBtn" class="btn primary" style="margin-top:24px">Oyuna Başla</button>
+            <button class="btn ghost" style="margin-top:12px" onclick="location.href='../index.html'">Ana Sayfa</button>
+        </main>
+
+        <footer class="footer">© Cem YILDIZ</footer>
+    </div>
+
+    <script>
+        // Oyun Modu Seçimi
+        const modeSingle = document.getElementById('modeSingle');
+        const modeLocal = document.getElementById('modeLocal');
+        const aiDifficultyRow = document.getElementById('aiDifficultyRow');
+        const colorSelectRow = document.getElementById('colorSelectRow');
+        const player2Input = document.getElementById('player2Name');
+
+        let isSinglePlayer = true;
+
+        modeSingle.addEventListener('click', () => {
+            modeSingle.classList.add('active');
+            modeLocal.classList.remove('active');
+            aiDifficultyRow.style.display = 'block';
+            colorSelectRow.style.display = 'block';
+            player2Input.disabled = true;
+            player2Input.value = 'Bilgisayar';
+            isSinglePlayer = true;
+        });
+
+        modeLocal.addEventListener('click', () => {
+            modeLocal.classList.add('active');
+            modeSingle.classList.remove('active');
+            aiDifficultyRow.style.display = 'none';
+            colorSelectRow.style.display = 'none';
+            player2Input.disabled = false;
+            player2Input.value = 'Oyuncu 2';
+            isSinglePlayer = false;
+        });
+
+        // Zorluk Seçimi
+        const diffBtns = document.querySelectorAll('.difficulty-selector .mode-btn');
+        let difficulty = 'medium';
+
+        diffBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                diffBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                difficulty = btn.id.replace('diff', '').toLowerCase();
+            });
+        });
+
+        // Renk Seçimi
+        const colorWhite = document.getElementById('colorWhite');
+        const colorBlack = document.getElementById('colorBlack');
+        let playerColor = 'white';
+
+        colorWhite.addEventListener('click', () => {
+            colorWhite.classList.add('active');
+            colorBlack.classList.remove('active');
+            playerColor = 'white';
+        });
+
+        colorBlack.addEventListener('click', () => {
+            colorBlack.classList.add('active');
+            colorWhite.classList.remove('active');
+            playerColor = 'black';
+        });
+
+        // Oyuna Başla
+        document.getElementById('startGameBtn').addEventListener('click', () => {
+            const p1 = document.getElementById('player1Name').value || 'Oyuncu';
+            const p2 = document.getElementById('player2Name').value || 'Bilgisayar';
+
+            const params = new URLSearchParams({
+                p1: p1,
+                p2: p2,
+                mode: isSinglePlayer ? 'ai' : 'local',
+                diff: difficulty,
+                color: playerColor
+            });
+
+            location.href = 'game.html?' + params.toString();
+        });
+    </script>
+</body>
+
+</html>
