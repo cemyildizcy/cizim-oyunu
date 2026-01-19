@@ -7,43 +7,89 @@
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2160219446901494"
 		crossorigin="anonymous"></script>
 	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<title>Strateji Oyunları — Ücretsiz Online Zeka Oyunları | cizgisavaslari.com</title>
+	<title>Online Oyunlar — Strateji, Kart ve Parti Oyunları | cizgisavaslari.com</title>
 	<meta name="description"
-		content="Ücretsiz online strateji oyunları. Çizgi Savaşları, Go, Amiral Battı ve daha fazlası. Arkadaşlarınla veya yapay zekaya karşı oyna!">
+		content="Ücretsiz online oyunlar. Strateji, kart ve parti oyunları. Satranç, Go, Pişti, Vampir Köylü ve daha fazlası!">
 	<meta name="keywords"
-		content="strateji oyunları, online oyunlar, çizgi savaşları, go oyunu, amiral battı, ücretsiz oyun, zeka oyunları">
+		content="strateji oyunları, kart oyunları, parti oyunları, online oyunlar, satranç, go, pişti, batak, vampir köylü">
 	<meta name="author" content="Cem YILDIZ">
 	<meta name="robots" content="index, follow">
 	<link rel="canonical" href="https://cizgisavaslari.com/">
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="website">
 	<meta property="og:url" content="https://cizgisavaslari.com/">
-	<meta property="og:title" content="Strateji Oyunları — Ücretsiz Online Zeka Oyunları">
+	<meta property="og:title" content="Online Oyunlar — Strateji, Kart ve Parti Oyunları">
 	<meta property="og:description"
-		content="Çizgi Savaşları, Go, Amiral Battı ve daha fazlası. Arkadaşlarınla veya yapay zekaya karşı oyna!">
+		content="Satranç, Go, Pişti, Vampir Köylü ve daha fazlası. Arkadaşlarınla veya yapay zekaya karşı oyna!">
 	<!-- Twitter -->
 	<meta property="twitter:card" content="summary_large_image">
 	<meta property="twitter:url" content="https://cizgisavaslari.com/">
-	<meta property="twitter:title" content="Strateji Oyunları — Ücretsiz Online Zeka Oyunları">
+	<meta property="twitter:title" content="Online Oyunlar — Strateji, Kart ve Parti Oyunları">
 	<meta property="twitter:description"
-		content="Çizgi Savaşları, Go, Amiral Battı ve daha fazlası. Arkadaşlarınla veya yapay zekaya karşı oyna!">
+		content="Satranç, Go, Pişti, Vampir Köylü ve daha fazlası. Arkadaşlarınla veya yapay zekaya karşı oyna!">
 	<link rel="stylesheet" href="style.css">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<style>
+		/* Kategori Filtreleri */
+		.category-filters {
+			display: flex;
+			justify-content: center;
+			gap: 8px;
+			flex-wrap: wrap;
+			margin-bottom: 24px;
+		}
+
+		.filter-btn {
+			padding: 10px 20px;
+			background: var(--bg-card);
+			border: 1px solid var(--border);
+			border-radius: 25px;
+			color: var(--text-secondary);
+			font-size: 14px;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+
+		.filter-btn:hover {
+			border-color: var(--neon-cyan);
+			color: var(--text);
+		}
+
+		.filter-btn.active {
+			background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+			border-color: transparent;
+			color: white;
+		}
+
+		.filter-btn .count {
+			background: rgba(255, 255, 255, 0.2);
+			padding: 2px 8px;
+			border-radius: 12px;
+			font-size: 12px;
+		}
+
+		.filter-btn.active .count {
+			background: rgba(255, 255, 255, 0.3);
+		}
+
+		/* Oyun Kartları */
 		.games-grid {
 			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-			gap: 20px;
-			margin-top: 32px;
+			grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+			gap: 16px;
 		}
 
 		.game-card {
 			background: var(--bg-card);
 			border: 1px solid var(--border);
 			border-radius: var(--radius);
-			padding: 32px 24px;
+			padding: 24px 20px;
 			text-align: center;
 			transition: all 0.3s ease;
 			cursor: pointer;
@@ -75,53 +121,106 @@
 			opacity: 0.8;
 		}
 
+		.game-card.hidden {
+			display: none;
+		}
+
 		.game-icon {
-			width: 64px;
-			height: 64px;
-			margin: 0 auto 20px;
+			width: 56px;
+			height: 56px;
+			margin: 0 auto 16px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			font-size: 32px;
+			font-size: 28px;
 			background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(0, 240, 255, 0.1));
-			border-radius: 16px;
+			border-radius: 14px;
 			border: 1px solid var(--border);
 		}
 
 		.game-card h3 {
-			font-size: 18px;
+			font-size: 16px;
 			font-weight: 600;
-			margin-bottom: 8px;
+			margin-bottom: 6px;
 			color: var(--text);
 		}
 
 		.game-card p {
-			font-size: 13px;
+			font-size: 12px;
 			color: var(--text-muted);
-			line-height: 1.5;
-			margin-bottom: 16px;
+			line-height: 1.4;
+			margin-bottom: 12px;
 		}
 
 		.game-tags {
 			display: flex;
 			justify-content: center;
-			gap: 8px;
+			gap: 6px;
 			flex-wrap: wrap;
 		}
 
 		.game-tag {
-			padding: 4px 10px;
+			padding: 3px 8px;
 			background: var(--bg-secondary);
 			border: 1px solid var(--border);
-			border-radius: 20px;
-			font-size: 11px;
+			border-radius: 16px;
+			font-size: 10px;
 			color: var(--text-muted);
 			text-transform: uppercase;
 			letter-spacing: 0.5px;
 		}
 
+		/* Kategori Badge */
+		.category-badge {
+			position: absolute;
+			top: 12px;
+			right: 12px;
+			padding: 3px 8px;
+			border-radius: 10px;
+			font-size: 9px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.category-badge.strateji {
+			background: rgba(59, 130, 246, 0.2);
+			color: #60a5fa;
+			border: 1px solid rgba(59, 130, 246, 0.3);
+		}
+
+		.category-badge.kart {
+			background: rgba(34, 197, 94, 0.2);
+			color: #4ade80;
+			border: 1px solid rgba(34, 197, 94, 0.3);
+		}
+
+		.category-badge.parti {
+			background: rgba(236, 72, 153, 0.2);
+			color: #f472b6;
+			border: 1px solid rgba(236, 72, 153, 0.3);
+		}
+
+		.category-badge.bulmaca {
+			background: rgba(234, 179, 8, 0.2);
+			color: #facc15;
+			border: 1px solid rgba(234, 179, 8, 0.3);
+		}
+
 		.page {
-			max-width: 600px;
+			max-width: 800px;
+		}
+
+		/* No results */
+		.no-results {
+			text-align: center;
+			padding: 48px 24px;
+			color: var(--text-muted);
+			display: none;
+		}
+
+		.no-results.show {
+			display: block;
 		}
 	</style>
 </head>
@@ -129,139 +228,156 @@
 <body>
 	<div class="page">
 		<header class="brand">
-			<h1>STRATEJİ OYUNLARI</h1>
-			<p class="subtitle">Klasik zeka oyunları • Tek başına veya arkadaşınla</p>
+			<h1>🎮 OYUN KOLEKSİYONU</h1>
+			<p class="subtitle">11 ücretsiz oyun • Strateji, kart ve parti oyunları</p>
 		</header>
 
-		<div class="games-grid">
-			<!-- Çizgi Savaşları -->
-			<div class="game-card" onclick="location.href='cizgi/index.html'">
-				<div class="game-icon">✏️</div>
-				<h3>Çizgi Savaşları</h3>
-				<p>Yol çizme ve kare kapatma. Stratejiyle rakibini yen!</p>
+		<!-- Kategori Filtreleri -->
+		<div class="category-filters">
+			<button class="filter-btn active" data-category="all">
+				Tümü <span class="count">11</span>
+			</button>
+			<button class="filter-btn" data-category="strateji">
+				🎯 Strateji <span class="count">5</span>
+			</button>
+			<button class="filter-btn" data-category="kart">
+				🃏 Kart <span class="count">2</span>
+			</button>
+			<button class="filter-btn" data-category="parti">
+				🎉 Parti <span class="count">2</span>
+			</button>
+			<button class="filter-btn" data-category="bulmaca">
+				🧩 Bulmaca <span class="count">2</span>
+			</button>
+		</div>
+
+		<!-- Oyun Kartları -->
+		<div class="games-grid" id="gamesGrid">
+			<!-- STRATEJİ OYUNLARI -->
+			<div class="game-card" data-category="strateji" onclick="location.href='satranc/index.html'">
+				<span class="category-badge strateji">Strateji</span>
+				<div class="game-icon">♟️</div>
+				<h3>Satranç</h3>
+				<p>Kralların oyunu. Strateji ve taktikle mat et!</p>
 				<div class="game-tags">
 					<span class="game-tag">2 Oyuncu</span>
 					<span class="game-tag">AI</span>
-					<span class="game-tag">Online</span>
 				</div>
 			</div>
 
-			<!-- Go Oyunu -->
-			<div class="game-card" onclick="location.href='go/index.html'">
+			<div class="game-card" data-category="strateji" onclick="location.href='go/index.html'">
+				<span class="category-badge strateji">Strateji</span>
 				<div class="game-icon">⚫</div>
 				<h3>Go (Baduk)</h3>
-				<p>Dünyanın en eski strateji oyunu. Alan kap, taş yakala!</p>
+				<p>Dünyanın en eski strateji oyunu. Alan kap!</p>
 				<div class="game-tags">
 					<span class="game-tag">2 Oyuncu</span>
 					<span class="game-tag">9×9</span>
-					<span class="game-tag">Klasik</span>
 				</div>
 			</div>
 
-			<!-- Amiral Battı -->
-			<div class="game-card" onclick="location.href='amiralbatti/index.html'">
-				<div class="game-icon">🚢</div>
-				<h3>Amiral Battı</h3>
-				<p>Klasik deniz savaşı. Düşman gemilerini bul ve batır!</p>
-				<div class="game-tags">
-					<span class="game-tag">2 Oyuncu</span>
-					<span class="game-tag">AI</span>
-					<span class="game-tag">10×10</span>
-				</div>
-			</div>
-
-			<!-- Satranç -->
-			<div class="game-card" onclick="location.href='satranc/index.html'">
-				<div class="game-icon">♟️</div>
-				<h3>Satranç</h3>
-				<p>Kralların oyunu. Strateji ve taktikle rakibini mat et!</p>
-				<div class="game-tags">
-					<span class="game-tag">2 Oyuncu</span>
-					<span class="game-tag">AI</span>
-					<span class="game-tag">Klasik</span>
-				</div>
-			</div>
-
-			<!-- Dama -->
-			<div class="game-card" onclick="location.href='dama/index.html'">
+			<div class="game-card" data-category="strateji" onclick="location.href='dama/index.html'">
+				<span class="category-badge strateji">Strateji</span>
 				<div class="game-icon">🔴</div>
 				<h3>Dama</h3>
 				<p>Klasik tahta oyunu. Tüm rakip taşları ye!</p>
 				<div class="game-tags">
 					<span class="game-tag">2 Oyuncu</span>
 					<span class="game-tag">AI</span>
-					<span class="game-tag">Strateji</span>
 				</div>
 			</div>
 
-			<!-- XOX -->
-			<div class="game-card" onclick="location.href='xox/index.html'">
-				<div class="game-icon">❌⭕</div>
-				<h3>XOX</h3>
-				<p>Tic-tac-toe klasik! Yenilmez AI'a meydan oku.</p>
+			<div class="game-card" data-category="strateji" onclick="location.href='amiralbatti/index.html'">
+				<span class="category-badge strateji">Strateji</span>
+				<div class="game-icon">🚢</div>
+				<h3>Amiral Battı</h3>
+				<p>Deniz savaşı. Düşman gemilerini batır!</p>
 				<div class="game-tags">
 					<span class="game-tag">2 Oyuncu</span>
 					<span class="game-tag">AI</span>
-					<span class="game-tag">Hızlı</span>
 				</div>
 			</div>
 
-			<!-- 2048 -->
-			<div class="game-card" onclick="location.href='2048/index.html'">
-				<div class="game-icon">🔢</div>
-				<h3>2048</h3>
-				<p>Sayıları birleştir, 2048'e ulaş! Bağımlılık yapıcı bulmaca.</p>
+			<div class="game-card" data-category="strateji" onclick="location.href='cizgi/index.html'">
+				<span class="category-badge strateji">Strateji</span>
+				<div class="game-icon">✏️</div>
+				<h3>Çizgi Savaşları</h3>
+				<p>Çizgi çek, kare kapat, puan topla!</p>
 				<div class="game-tags">
-					<span class="game-tag">Tek Oyuncu</span>
-					<span class="game-tag">Bulmaca</span>
+					<span class="game-tag">2 Oyuncu</span>
+					<span class="game-tag">Online</span>
 				</div>
 			</div>
 
-			<!-- Pişti -->
-			<div class="game-card" onclick="location.href='pisti/index.html'">
+			<!-- KART OYUNLARI -->
+			<div class="game-card" data-category="kart" onclick="location.href='pisti/index.html'">
+				<span class="category-badge kart">Kart</span>
 				<div class="game-icon">🃏</div>
 				<h3>Pişti</h3>
-				<p>Türk kart oyunu klasiği. Vale ile pişti yap!</p>
+				<p>Türk klasiği. Vale ile pişti yap!</p>
 				<div class="game-tags">
 					<span class="game-tag">2 Oyuncu</span>
 					<span class="game-tag">AI</span>
-					<span class="game-tag">Kart</span>
 				</div>
 			</div>
 
-			<!-- Batak -->
-			<div class="game-card" onclick="location.href='batak/index.html'">
+			<div class="game-card" data-category="kart" onclick="location.href='batak/index.html'">
+				<span class="category-badge kart">Kart</span>
 				<div class="game-icon">🃏</div>
 				<h3>Batak</h3>
-				<p>4 kişilik koz oyunu. Stratejik el toplama!</p>
+				<p>4 kişilik koz oyunu. El topla!</p>
 				<div class="game-tags">
 					<span class="game-tag">4 Oyuncu</span>
 					<span class="game-tag">AI</span>
-					<span class="game-tag">Kart</span>
 				</div>
 			</div>
 
-			<!-- Vampir Köylü -->
-			<div class="game-card" onclick="location.href='vampir-koylu/index.html'">
+			<!-- PARTİ OYUNLARI -->
+			<div class="game-card" data-category="parti" onclick="location.href='vampir-koylu/index.html'">
+				<span class="category-badge parti">Parti</span>
 				<div class="game-icon">🧛</div>
 				<h3>Vampir Köylü</h3>
 				<p>Sosyal dedektif oyunu. Vampiri bul!</p>
 				<div class="game-tags">
 					<span class="game-tag">4-12 Oyuncu</span>
-					<span class="game-tag">Parti</span>
 				</div>
 			</div>
 
-			<!-- Kelime Oyunu -->
-			<div class="game-card" onclick="location.href='kelime-oyunu/index.html'">
+			<div class="game-card" data-category="parti" onclick="location.href='kelime-oyunu/index.html'">
+				<span class="category-badge parti">Parti</span>
 				<div class="game-icon">🎯</div>
 				<h3>Kelime Oyunu</h3>
-				<p>Tabu tarzı kelime anlatma. Yasaklı kelimelere dikkat!</p>
+				<p>Tabu tarzı. Yasaklı kelimelere dikkat!</p>
 				<div class="game-tags">
 					<span class="game-tag">2+ Takım</span>
-					<span class="game-tag">Parti</span>
 				</div>
 			</div>
+
+			<!-- BULMACA OYUNLARI -->
+			<div class="game-card" data-category="bulmaca" onclick="location.href='2048/index.html'">
+				<span class="category-badge bulmaca">Bulmaca</span>
+				<div class="game-icon">🔢</div>
+				<h3>2048</h3>
+				<p>Sayıları birleştir, 2048'e ulaş!</p>
+				<div class="game-tags">
+					<span class="game-tag">Tek Oyuncu</span>
+				</div>
+			</div>
+
+			<div class="game-card" data-category="bulmaca" onclick="location.href='xox/index.html'">
+				<span class="category-badge bulmaca">Bulmaca</span>
+				<div class="game-icon">❌⭕</div>
+				<h3>XOX</h3>
+				<p>Klasik tic-tac-toe. AI'ı yenebilir misin?</p>
+				<div class="game-tags">
+					<span class="game-tag">2 Oyuncu</span>
+					<span class="game-tag">Hızlı</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="no-results" id="noResults">
+			😕 Bu kategoride oyun bulunamadı.
 		</div>
 
 		<footer class="footer">
@@ -275,6 +391,37 @@
 			<div class="footer-copyright">© 2026 Cem YILDIZ — cizgisavaslari.com</div>
 		</footer>
 	</div>
+
+	<script>
+		// Kategori filtreleme
+		const filterBtns = document.querySelectorAll('.filter-btn');
+		const gameCards = document.querySelectorAll('.game-card');
+		const noResults = document.getElementById('noResults');
+
+		filterBtns.forEach(btn => {
+			btn.addEventListener('click', () => {
+				// Aktif butonu değiştir
+				filterBtns.forEach(b => b.classList.remove('active'));
+				btn.classList.add('active');
+
+				const category = btn.dataset.category;
+				let visibleCount = 0;
+
+				// Kartları filtrele
+				gameCards.forEach(card => {
+					if (category === 'all' || card.dataset.category === category) {
+						card.classList.remove('hidden');
+						visibleCount++;
+					} else {
+						card.classList.add('hidden');
+					}
+				});
+
+				// Sonuç yoksa mesaj göster
+				noResults.classList.toggle('show', visibleCount === 0);
+			});
+		});
+	</script>
 
 	<!-- Cookie Consent -->
 	<script src="cookie-consent.js"></script>
