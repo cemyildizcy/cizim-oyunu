@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2160219446901494"
+        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Papaz Kaçtı — Kart Oyunu</title>
+    <meta name="description" content="Online Papaz Kaçtı oyna. Maça Kızı ve kupalardan kaç!">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .table {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .center-cards {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 150px;
+        }
+
+        .player-position {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .player-position.bottom {
+            bottom: -55px;
+        }
+
+        .player-position.top {
+            top: -55px;
+        }
+
+        .player-position.left {
+            left: -75px;
+        }
+
+        .player-position.right {
+            right: -75px;
+        }
+
+        .player-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--bg-card);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .player-label.active {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        .player-points {
+            font-size: 10px;
+            color: var(--neon-pink);
+            font-weight: 600;
+        }
+
+        .player-hand {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+            flex-wrap: wrap;
+            max-width: 400px;
+        }
+
+        .card {
+            width: 45px;
+            height: 63px;
+            background: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .card:hover:not(.disabled) {
+            transform: translateY(-6px);
+        }
+
+        .card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .card.red {
+            color: #dc2626;
+        }
+
+        .card.black {
+            color: #1f2937;
+        }
+
+        .card.small {
+            width: 32px;
+            height: 45px;
+            font-size: 12px;
+        }
+
+        .score-panel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            background: var(--bg-card);
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 9px;
+            color: var(--text-muted);
+        }
+
+        .score-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+        }
+
+        .danger-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--neon-pink);
+            color: white;
+            padding: 16px 32px;
+            border-radius: var(--radius);
+            font-size: 20px;
+            font-weight: 700;
+            animation: pop 0.3s ease;
+            z-index: 100;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .page {
+            max-width: 550px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <header class="game-header">
+            <div class="info">
+                <h2>Papaz Kaçtı</h2>
+                <div id="status" class="status">Yükleniyor...</div>
+            </div>
+            <div class="controls">
+                <button class="small-btn" onclick="location.href='index.html'">Geri</button>
+                <button class="small-btn" id="resetGameBtn">Yeniden</button>
+            </div>
+        </header>
+
+        <div class="game-container">
+            <div class="table">
+                <div class="player-position top">
+                    <div class="player-label" id="p2Label">AI 1</div>
+                    <div class="player-points" id="p2Points">0 puan</div>
+                </div>
+                <div class="player-position left">
+                    <div class="player-label" id="p3Label">AI 2</div>
+                    <div class="player-points" id="p3Points">0 puan</div>
+                </div>
+                <div class="player-position right">
+                    <div class="player-label" id="p4Label">AI 3</div>
+                    <div class="player-points" id="p4Points">0 puan</div>
+                </div>
+                <div class="center-cards" id="centerCards"></div>
+            </div>
+
+            <div class="player-label active" id="p1Label">Oyuncu</div>
+            <div class="player-points" id="p1Points">0 puan</div>
+
+            <div class="player-hand" id="playerHand"></div>
+
+            <div class="score-panel">
+                <div class="score-item">
+                    <div class="score-label">Sen</div>
+                    <div class="score-value" id="p1Score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">AI 1</div>
+                    <div class="score-value" id="p2Score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">AI 2</div>
+                    <div class="score-value" id="p3Score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">AI 3</div>
+                    <div class="score-value" id="p4Score">0</div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">© Cem YILDIZ</footer>
+    </div>
+
+    <div id="gameOverModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="gameOverMessage"></h2>
+            <div id="gameOverDetails" style="margin:16px 0;color:var(--text-secondary)"></div>
+            <div class="modal-buttons">
+                <button id="playAgainBtn" class="btn primary">Tekrar Oyna</button>
+                <button id="exitBtn" class="btn ghost">Çıkış</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rulesModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>♠️ Papaz Kaçtı</h2>
+            <div class="rules-text">
+                <p><strong>Amaç:</strong> En az puan topla!</p>
+                <br>
+                <p><strong>Puanlama:</strong></p>
+                <ul style="margin-left:20px;margin-top:8px">
+                    <li>Her ♥ = 1 puan</li>
+                    <li>♠Q (Maça Kızı) = 13 puan</li>
+                    <li>26 puan alırsan = 0 puan (herkese +26)</li>
+                </ul>
+                <br>
+                <p><strong>Kural:</strong> Aynı renk karşılanmalı, yoksa herhangi kart.</p>
+            </div>
+            <div class="modal-buttons" style="margin-top:20px">
+                <button id="closeRulesBtn" class="btn primary">Başla</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
