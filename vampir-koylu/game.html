@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2160219446901494"
+        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Vampir Köylü — Oyun</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .game-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .phase-indicator {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .phase-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .phase-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .player-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .player-card:hover:not(.dead):not(.disabled) {
+            border-color: var(--neon-cyan);
+            transform: translateY(-4px);
+        }
+
+        .player-card.selected {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+        }
+
+        .player-card.dead {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .player-card.dead::after {
+            content: '💀';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+        }
+
+        .player-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .player-role-icon {
+            font-size: 28px;
+            margin-top: 8px;
+        }
+
+        .role-reveal {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin: 24px auto;
+            max-width: 300px;
+        }
+
+        .role-reveal-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .role-reveal-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .role-reveal-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .night-overlay {
+            background: linear-gradient(to bottom, #0a0a1a, #1a1a3a);
+        }
+
+        .day-overlay {
+            background: linear-gradient(to bottom, #1a1a2e, #2d2d4a);
+        }
+
+        .timer {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            margin: 16px 0;
+        }
+
+        .vote-count {
+            font-size: 14px;
+            color: var(--neon-pink);
+            margin-top: 4px;
+        }
+
+        .message-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin: 16px 0;
+            color: var(--text-secondary);
+        }
+
+        .page {
+            max-width: 600px;
+        }
+
+        body.night {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%);
+        }
+
+        body.day {
+            background: linear-gradient(135deg, #1a1a2e 0%, #2d2d4a 100%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <header class="game-header">
+            <div class="info">
+                <h2>Vampir Köylü</h2>
+                <div id="status" class="status">Roller dağıtılıyor...</div>
+            </div>
+            <div class="controls">
+                <button class="small-btn" onclick="location.href='index.html'">Çıkış</button>
+            </div>
+        </header>
+
+        <div class="game-container" id="gameContainer">
+            <!-- Dinamik içerik buraya gelecek -->
+        </div>
+
+        <footer class="footer">© Cem YILDIZ</footer>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
