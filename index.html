@@ -313,6 +313,23 @@
 		.no-results.show {
 			display: block;
 		}
+
+		/* Mobile responsive */
+		@media (max-width: 480px) {
+			.games-grid {
+				grid-template-columns: 1fr;
+				gap: 12px;
+			}
+
+			.category-filters {
+				gap: 6px;
+			}
+
+			.filter-btn {
+				padding: 8px 14px;
+				font-size: 12px;
+			}
+		}
 	</style>
 </head>
 
