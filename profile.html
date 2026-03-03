@@ -322,14 +322,39 @@
                 return;
             }
 
-            const profile = await loadUserProfile();
-            if (!profile) {
+            try {
+                // Try to init user in DB first (creates if not exists)
                 await initUserInDB();
-                window.location.reload();
-                return;
-            }
 
-            renderProfile(user, profile);
+                // Try loading from Firebase
+                let profile = await loadUserProfile();
+
+                // If Firebase returns null, use defaults
+                if (!profile) {
+                    profile = {
+                        displayName: getUserDisplayName(),
+                        email: user.email || '',
+                        level: 1,
+                        xp: 0,
+                        totalXP: 0,
+                        gamesPlayed: [],
+                        achievements: [],
+                        dailyStreak: 0,
+                        isGuest: user.isAnonymous
+                    };
+                }
+
+                renderProfile(user, profile);
+            } catch (error) {
+                console.error('Profile load error:', error);
+                // Show error state instead of infinite loading
+                document.getElementById('loadingState').innerHTML = `
+                    <div style="font-size:48px; margin-bottom:16px;">⚠️</div>
+                    <p style="color: var(--text-muted);">Profil yüklenemedi.</p>
+                    <p style="color: var(--text-muted); font-size:12px; margin-top:8px;">${error.message || 'Firebase bağlantı hatası'}</p>
+                    <a href="index.html" class="btn ghost" style="margin-top:16px; display:inline-block; text-decoration:none;">← Ana Sayfa</a>
+                `;
+            }
         });
 
         function renderProfile(user, data) {
