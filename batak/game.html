@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2160219446901494"
+        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Batak — Oyun</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .table {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .center-cards {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 160px;
+        }
+
+        .player-position {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .player-position.bottom {
+            bottom: -60px;
+        }
+
+        .player-position.top {
+            top: -60px;
+        }
+
+        .player-position.left {
+            left: -80px;
+        }
+
+        .player-position.right {
+            right: -80px;
+        }
+
+        .player-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: var(--bg-card);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .player-label.active {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        .player-tricks {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .player-hand {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            max-width: 400px;
+        }
+
+        .card {
+            width: 50px;
+            height: 70px;
+            background: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .card:hover:not(.disabled) {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .card.red {
+            color: #dc2626;
+        }
+
+        .card.black {
+            color: #1f2937;
+        }
+
+        .card.small {
+            width: 36px;
+            height: 50px;
+            font-size: 14px;
+        }
+
+        .trump-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .trump-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .trump-suit {
+            font-size: 24px;
+        }
+
+        .score-panel {
+            display: flex;
+            gap: 16px;
+            background: var(--bg-card);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .score-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+        }
+
+        .trump-select-modal {
+            display: flex;
+            gap: 16px;
+        }
+
+        .trump-btn {
+            font-size: 48px;
+            padding: 16px 24px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .trump-btn:hover {
+            border-color: var(--neon-cyan);
+            transform: scale(1.1);
+        }
+
+        .page {
+            max-width: 600px;
+        }
+
+        @media (max-width: 500px) {
+            .table {
+                width: 260px;
+                height: 260px;
+            }
+
+            .card {
+                width: 40px;
+                height: 56px;
+                font-size: 14px;
+            }
+
+            .card.small {
+                width: 30px;
+                height: 42px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <header class="game-header">
+            <div class="info">
+                <h2>Batak</h2>
+                <div id="status" class="status">Yükleniyor...</div>
+            </div>
+            <div class="controls">
+                <button class="small-btn" onclick="location.href='index.html'">Geri</button>
+                <button class="small-btn" id="resetGameBtn">Yeniden</button>
+            </div>
+        </header>
+
+        <div class="game-container">
+            <!-- Koz göstergesi -->
+            <div class="trump-display">
+                <span class="trump-label">Koz:</span>
+                <span class="trump-suit" id="trumpSuit">-</span>
+            </div>
+
+            <!-- Masa -->
+            <div class="table">
+                <div class="player-position top">
+                    <div class="player-label" id="p2Label">AI 1</div>
+                    <div class="player-tricks" id="p2Tricks">0 el</div>
+                </div>
+                <div class="player-position left">
+                    <div class="player-label" id="p3Label">AI 2</div>
+                    <div class="player-tricks" id="p3Tricks">0 el</div>
+                </div>
+                <div class="player-position right">
+                    <div class="player-label" id="p4Label">AI 3</div>
+                    <div class="player-tricks" id="p4Tricks">0 el</div>
+                </div>
+
+                <div class="center-cards" id="centerCards"></div>
+            </div>
+
+            <!-- Oyuncu bilgi -->
+            <div class="player-label active" id="p1Label">Oyuncu</div>
+            <div class="player-tricks" id="p1Tricks">0 el</div>
+
+            <!-- Oyuncu eli -->
+            <div class="player-hand" id="playerHand"></div>
+
+            <!-- Skor -->
+            <div class="score-panel">
+                <div class="score-item">
+                    <div class="score-label">Sen</div>
+                    <div class="score-value" id="p1Score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">AI 1</div>
+                    <div class="score-value" id="p2Score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">AI 2</div>
+                    <div class="score-value" id="p3Score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">AI 3</div>
+                    <div class="score-value" id="p4Score">0</div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">© Cem YILDIZ</footer>
+    </div>
+
+    <!-- Koz Seçimi Modal -->
+    <div id="trumpModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Koz Seç</h2>
+            <div class="trump-select-modal">
+                <button class="trump-btn" data-suit="♠">♠</button>
+                <button class="trump-btn" data-suit="♥">♥</button>
+                <button class="trump-btn" data-suit="♦">♦</button>
+                <button class="trump-btn" data-suit="♣">♣</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Oyun Sonu Modal -->
+    <div id="gameOverModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="gameOverMessage"></h2>
+            <div id="gameOverDetails" style="margin:16px 0;color:var(--text-secondary)"></div>
+            <div class="modal-buttons">
+                <button id="playAgainBtn" class="btn primary">Tekrar Oyna</button>
+                <button id="exitBtn" class="btn ghost">Çıkış</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kurallar Modal -->
+    <div id="rulesModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>🃏 Batak</h2>
+            <div class="rules-text">
+                <p><strong>Amaç:</strong> En fazla el topla!</p>
+                <br>
+                <p><strong>Kurallar:</strong></p>
+                <ul style="margin-left:20px;margin-top:8px">
+                    <li>4 oyunculu kart oyunu</li>
+                    <li>İlk oynayan koz rengi seçer</li>
+                    <li>Aynı renk kartla karşılanmalı</li>
+                    <li>Yoksa koz veya başka kart atılır</li>
+                    <li>En yüksek koz veya renk eli alır</li>
+                </ul>
+            </div>
+            <div class="modal-buttons" style="margin-top:20px">
+                <button id="closeRulesBtn" class="btn primary">Başla</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>

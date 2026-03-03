@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2160219446901494"
+        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Vampir Köylü — Parti Oyunu</title>
+    <meta name="description" content="Online Vampir Köylü (Werewolf/Mafia) oyna. Arkadaşlarınla eğlenceli parti oyunu!">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .player-count-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .count-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            color: var(--text);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .count-btn:hover {
+            border-color: var(--neon-cyan);
+        }
+
+        .count-btn.active {
+            border-color: var(--neon-pink);
+            background: var(--neon-pink);
+            color: white;
+        }
+
+        .role-preview {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+
+        .role-preview-item {
+            display: inline-block;
+            margin: 4px 8px;
+            font-size: 13px;
+        }
+
+        .role-icon {
+            font-size: 20px;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <header class="brand">
+            <h1>🧛 VAMPİR KÖYLÜ</h1>
+            <p class="subtitle">Sosyal Dedektif Oyunu</p>
+        </header>
+
+        <main class="card center-card">
+            <div class="form-section">
+                <div class="section-title">Oyuncu Sayısı</div>
+                <div class="player-count-selector" id="playerCountSelector">
+                    <button class="count-btn" data-count="4">4</button>
+                    <button class="count-btn" data-count="5">5</button>
+                    <button class="count-btn active" data-count="6">6</button>
+                    <button class="count-btn" data-count="7">7</button>
+                    <button class="count-btn" data-count="8">8</button>
+                    <button class="count-btn" data-count="9">9</button>
+                    <button class="count-btn" data-count="10">10</button>
+                    <button class="count-btn" data-count="12">12</button>
+                </div>
+
+                <div class="role-preview" id="rolePreview">
+                    <span class="role-preview-item"><span class="role-icon">🧛</span>Vampir: 1</span>
+                    <span class="role-preview-item"><span class="role-icon">👁️</span>Kahin: 1</span>
+                    <span class="role-preview-item"><span class="role-icon">👨‍🌾</span>Köylü: 4</span>
+                </div>
+
+                <div class="section-title" style="margin-top:24px">Özel Roller</div>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="roleSeer" checked>
+                        <span>👁️ Kahin (Gece birinin rolünü öğrenir)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="roleDoctor">
+                        <span>🏥 Doktor (Gece birini korur)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="roleHunter">
+                        <span>🏹 Avcı (Ölünce birini vurur)</span>
+                    </label>
+                </div>
+            </div>
+
+            <button id="startGameBtn" class="btn primary" style="margin-top:24px">Oyuna Başla</button>
+            <button class="btn ghost" style="margin-top:12px" onclick="location.href='../index.html'">Ana Sayfa</button>
+        </main>
+
+        <footer class="footer">© Cem YILDIZ</footer>
+    </div>
+
+    <script>
+        let playerCount = 6;
+
+        // Oyuncu sayısı seçimi
+        document.querySelectorAll('.count-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                playerCount = parseInt(btn.dataset.count);
+                updateRolePreview();
+            });
+        });
+
+        function getRoleDistribution(count) {
+            // Vampir sayısı: 4-6 kişi = 1, 7-9 kişi = 2, 10+ = 3
+            let vampires = count <= 6 ? 1 : (count <= 9 ? 2 : 3);
+            let seer = document.getElementById('roleSeer').checked ? 1 : 0;
+            let doctor = document.getElementById('roleDoctor').checked ? 1 : 0;
+            let hunter = document.getElementById('roleHunter').checked ? 1 : 0;
+            let villagers = count - vampires - seer - doctor - hunter;
+
+            return { vampires, seer, doctor, hunter, villagers: Math.max(0, villagers) };
+        }
+
+        function updateRolePreview() {
+            const dist = getRoleDistribution(playerCount);
+            let html = '';
+            html += `<span class="role-preview-item"><span class="role-icon">🧛</span>Vampir: ${dist.vampires}</span>`;
+            if (dist.seer) html += `<span class="role-preview-item"><span class="role-icon">👁️</span>Kahin: 1</span>`;
+            if (dist.doctor) html += `<span class="role-preview-item"><span class="role-icon">🏥</span>Doktor: 1</span>`;
+            if (dist.hunter) html += `<span class="role-preview-item"><span class="role-icon">🏹</span>Avcı: 1</span>`;
+            html += `<span class="role-preview-item"><span class="role-icon">👨‍🌾</span>Köylü: ${dist.villagers}</span>`;
+            document.getElementById('rolePreview').innerHTML = html;
+        }
+
+        // Checkbox değişikliklerini dinle
+        ['roleSeer', 'roleDoctor', 'roleHunter'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updateRolePreview);
+        });
+
+        // Oyunu başlat
+        document.getElementById('startGameBtn').addEventListener('click', () => {
+            const params = new URLSearchParams({
+                players: playerCount,
+                seer: document.getElementById('roleSeer').checked ? 1 : 0,
+                doctor: document.getElementById('roleDoctor').checked ? 1 : 0,
+                hunter: document.getElementById('roleHunter').checked ? 1 : 0
+            });
+            location.href = 'game.html?' + params.toString();
+        });
+
+        // İlk önizleme
+        updateRolePreview();
+    </script>
+</body>
+
+</html>

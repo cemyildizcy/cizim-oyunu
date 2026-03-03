@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2160219446901494"
+        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Pişti — Oyun</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            min-height: 500px;
+        }
+
+        .opponent-area,
+        .player-area {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            min-height: 100px;
+        }
+
+        .card {
+            width: 60px;
+            height: 84px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .card.red {
+            color: #dc2626;
+        }
+
+        .card.black {
+            color: #1f2937;
+        }
+
+        .card.back {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            font-size: 20px;
+        }
+
+        .table-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            padding: 24px;
+            min-height: 120px;
+        }
+
+        .deck-pile {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .deck {
+            position: relative;
+        }
+
+        .deck .card {
+            position: absolute;
+            cursor: default;
+        }
+
+        .deck .card:nth-child(1) {
+            top: 0;
+            left: 0;
+        }
+
+        .deck .card:nth-child(2) {
+            top: 2px;
+            left: 2px;
+        }
+
+        .deck .card:nth-child(3) {
+            top: 4px;
+            left: 4px;
+        }
+
+        .pile {
+            min-width: 60px;
+            min-height: 84px;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pile .card {
+            cursor: default;
+        }
+
+        .score-panel {
+            display: flex;
+            gap: 24px;
+            background: var(--bg-card);
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+        }
+
+        .pisti-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--neon-pink);
+            color: white;
+            padding: 24px 48px;
+            border-radius: var(--radius);
+            font-size: 32px;
+            font-weight: 700;
+            animation: pistiPop 0.5s ease;
+            z-index: 100;
+        }
+
+        @keyframes pistiPop {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .player-info.active {
+            border-color: var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .player-cards-count {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .page {
+            max-width: 700px;
+        }
+
+        @media (max-width: 500px) {
+            .card {
+                width: 50px;
+                height: 70px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <header class="game-header">
+            <div class="info">
+                <h2>Pişti</h2>
+                <div id="status" class="status">Yükleniyor...</div>
+            </div>
+            <div class="controls">
+                <button class="small-btn" onclick="location.href='index.html'">Geri</button>
+                <button class="small-btn" id="resetGameBtn">Yeniden</button>
+            </div>
+        </header>
+
+        <div class="game-container">
+            <!-- Rakip bilgi -->
+            <div class="player-info" id="opponentInfo">
+                <span class="player-name" id="opponentName">Bilgisayar</span>
+                <span class="player-cards-count" id="opponentCardCount">4 kart</span>
+            </div>
+
+            <!-- Rakip eli (kapalı) -->
+            <div class="opponent-area" id="opponentHand"></div>
+
+            <!-- Masa -->
+            <div class="table-area">
+                <div class="deck-pile">
+                    <div class="deck" id="deck"></div>
+                    <div class="pile" id="pile"></div>
+                </div>
+            </div>
+
+            <!-- Oyuncu eli -->
+            <div class="player-area" id="playerHand"></div>
+
+            <!-- Oyuncu bilgi -->
+            <div class="player-info" id="playerInfo">
+                <span class="player-name" id="playerName">Oyuncu</span>
+                <span class="player-cards-count" id="playerCardCount">4 kart</span>
+            </div>
+
+            <!-- Skor -->
+            <div class="score-panel">
+                <div class="score-item">
+                    <div class="score-label" id="p1ScoreLabel">Sen</div>
+                    <div class="score-value" id="p1Score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Pişti</div>
+                    <div class="score-value" id="pistiCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label" id="p2ScoreLabel">AI</div>
+                    <div class="score-value" id="p2Score">0</div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">© Cem YILDIZ</footer>
+    </div>
+
+    <!-- Oyun Sonu Modal -->
+    <div id="gameOverModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="gameOverMessage"></h2>
+            <div id="gameOverDetails" style="margin:16px 0;color:var(--text-secondary)"></div>
+            <div class="modal-buttons">
+                <button id="playAgainBtn" class="btn primary">Tekrar Oyna</button>
+                <button id="exitBtn" class="btn ghost">Çıkış</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kurallar Modal -->
+    <div id="rulesModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>🃏 Pişti</h2>
+            <div class="rules-text">
+                <p><strong>Amaç:</strong> En fazla puanı topla!</p>
+                <br>
+                <p><strong>Kurallar:</strong></p>
+                <ul style="margin-left:20px;margin-top:8px">
+                    <li>Masadaki kartla aynı değeri at = kartları topla</li>
+                    <li>Tek kart varken aynı değer = PİŞTİ (+10 puan)</li>
+                    <li>Vale (J) tüm kartları toplar</li>
+                    <li>J ile pişti = Çifte pişti (+20 puan)</li>
+                </ul>
+                <br>
+                <p><strong>Puanlama:</strong></p>
+                <p>J=1, A=1, 2♣=2, 10♦=3, Çoğunluk=3</p>
+            </div>
+            <div class="modal-buttons" style="margin-top:20px">
+                <button id="closeRulesBtn" class="btn primary">Başla</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>

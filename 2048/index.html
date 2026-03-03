@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2160219446901494"
+        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>2048 — Sayı Bulmacası</title>
+    <meta name="description" content="2048 online oyna. Sayıları birleştir, 2048'e ulaş!">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            max-width: 340px;
+        }
+
+        .stat-box {
+            flex: 1;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            margin-top: 4px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            grid-template-rows: repeat(4, 80px);
+            gap: 8px;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .tile {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            color: var(--text);
+            transition: all 0.15s ease;
+        }
+
+        .tile[data-value="2"] {
+            background: #eee4da;
+            color: #776e65;
+        }
+
+        .tile[data-value="4"] {
+            background: #ede0c8;
+            color: #776e65;
+        }
+
+        .tile[data-value="8"] {
+            background: #f2b179;
+            color: #f9f6f2;
+        }
+
+        .tile[data-value="16"] {
+            background: #f59563;
+            color: #f9f6f2;
+        }
+
+        .tile[data-value="32"] {
+            background: #f67c5f;
+            color: #f9f6f2;
+        }
+
+        .tile[data-value="64"] {
+            background: #f65e3b;
+            color: #f9f6f2;
+        }
+
+        .tile[data-value="128"] {
+            background: #edcf72;
+            color: #f9f6f2;
+            font-size: 24px;
+        }
+
+        .tile[data-value="256"] {
+            background: #edcc61;
+            color: #f9f6f2;
+            font-size: 24px;
+        }
+
+        .tile[data-value="512"] {
+            background: #edc850;
+            color: #f9f6f2;
+            font-size: 24px;
+        }
+
+        .tile[data-value="1024"] {
+            background: #edc53f;
+            color: #f9f6f2;
+            font-size: 20px;
+        }
+
+        .tile[data-value="2048"] {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: #f9f6f2;
+            font-size: 20px;
+            box-shadow: 0 0 30px var(--neon-purple);
+        }
+
+        .tile[data-value="4096"] {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            color: #f9f6f2;
+            font-size: 20px;
+        }
+
+        .tile.new {
+            animation: pop 0.2s ease;
+        }
+
+        .tile.merged {
+            animation: bounce 0.2s ease;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .instructions {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            max-width: 340px;
+        }
+
+        .instructions kbd {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+
+        .page {
+            max-width: 500px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <header class="game-header">
+            <div class="info">
+                <h2>2048</h2>
+                <div id="status" class="status">Sayıları birleştir!</div>
+            </div>
+            <div class="controls">
+                <button class="small-btn" onclick="location.href='../index.html'">Geri</button>
+                <button class="small-btn" id="resetGameBtn">Yeniden</button>
+            </div>
+        </header>
+
+        <div class="game-container">
+            <div class="stats-bar">
+                <div class="stat-box">
+                    <div class="stat-label">Skor</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">En Yüksek</div>
+                    <div class="stat-value" id="bestScore">0</div>
+                </div>
+            </div>
+
+            <div id="board" class="game-board"></div>
+
+            <div class="instructions">
+                <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> veya kaydır
+            </div>
+        </div>
+
+        <footer class="footer">© Cem YILDIZ</footer>
+    </div>
+
+    <!-- Oyun Sonu Modal -->
+    <div id="gameOverModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="gameOverMessage">Oyun Bitti!</h2>
+            <div style="margin:16px 0;color:var(--text-secondary)">
+                Skor: <span id="finalScore">0</span>
+            </div>
+            <div class="modal-buttons">
+                <button id="playAgainBtn" class="btn primary">Tekrar Oyna</button>
+                <button id="exitBtn" class="btn ghost">Çıkış</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const boardEl = document.getElementById('board');
+        const statusDiv = document.getElementById('status');
+        const scoreEl = document.getElementById('score');
+        const bestScoreEl = document.getElementById('bestScore');
+        const resetBtn = document.getElementById('resetGameBtn');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const finalScoreEl = document.getElementById('finalScore');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const exitBtn = document.getElementById('exitBtn');
+
+        let board = [];
+        let score = 0;
+        let bestScore = parseInt(localStorage.getItem('2048_best')) || 0;
+        let gameOver = false;
+
+        function init() {
+            bestScoreEl.textContent = bestScore;
+            resetGame();
+        }
+
+        function resetGame() {
+            board = Array(4).fill(null).map(() => Array(4).fill(0));
+            score = 0;
+            gameOver = false;
+            gameOverModal.classList.add('hidden');
+
+            addRandomTile();
+            addRandomTile();
+            renderBoard();
+            updateScore();
+        }
+
+        function addRandomTile() {
+            const emptyCells = [];
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    if (board[r][c] === 0) {
+                        emptyCells.push({ r, c });
+                    }
+                }
+            }
+
+            if (emptyCells.length > 0) {
+                const { r, c } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                board[r][c] = Math.random() < 0.9 ? 2 : 4;
+                return { r, c };
+            }
+            return null;
+        }
+
+        function renderBoard(newTile = null, mergedTiles = []) {
+            boardEl.innerHTML = '';
+
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    const value = board[r][c];
+
+                    if (value > 0) {
+                        tile.textContent = value;
+                        tile.dataset.value = value;
+
+                        if (newTile && newTile.r === r && newTile.c === c) {
+                            tile.classList.add('new');
+                        }
+                        if (mergedTiles.some(t => t.r === r && t.c === c)) {
+                            tile.classList.add('merged');
+                        }
+                    }
+
+                    boardEl.appendChild(tile);
+                }
+            }
+        }
+
+        function updateScore() {
+            scoreEl.textContent = score;
+            if (score > bestScore) {
+                bestScore = score;
+                bestScoreEl.textContent = bestScore;
+                localStorage.setItem('2048_best', bestScore);
+            }
+        }
+
+        function move(direction) {
+            if (gameOver) return;
+
+            let moved = false;
+            const mergedTiles = [];
+            let newBoard = board.map(r => [...r]);
+
+            // Yönü normalleştir (hep sola doğru işle)
+            if (direction === 'up' || direction === 'down') {
+                newBoard = transpose(newBoard);
+            }
+            if (direction === 'right' || direction === 'down') {
+                newBoard = newBoard.map(r => r.reverse());
+            }
+
+            // Her satırı işle
+            for (let r = 0; r < 4; r++) {
+                const row = newBoard[r].filter(v => v !== 0);
+                const newRow = [];
+
+                for (let i = 0; i < row.length; i++) {
+                    if (row[i] === row[i + 1]) {
+                        newRow.push(row[i] * 2);
+                        score += row[i] * 2;
+                        i++;
+                        moved = true;
+                    } else {
+                        newRow.push(row[i]);
+                    }
+                }
+
+                while (newRow.length < 4) newRow.push(0);
+
+                if (newRow.join(',') !== newBoard[r].join(',')) moved = true;
+                newBoard[r] = newRow;
+            }
+
+            // Geri dönüştür
+            if (direction === 'right' || direction === 'down') {
+                newBoard = newBoard.map(r => r.reverse());
+            }
+            if (direction === 'up' || direction === 'down') {
+                newBoard = transpose(newBoard);
+            }
+
+            if (moved) {
+                board = newBoard;
+                const newTile = addRandomTile();
+                renderBoard(newTile, mergedTiles);
+                updateScore();
+
+                // 2048'e ulaşıldı mı?
+                if (board.flat().includes(2048)) {
+                    statusDiv.textContent = '🎉 2048\'e ulaştın!';
+                }
+
+                // Oyun bitti mi?
+                if (!canMove()) {
+                    endGame();
+                }
+            }
+        }
+
+        function transpose(matrix) {
+            return matrix[0].map((_, i) => matrix.map(row => row[i]));
+        }
+
+        function canMove() {
+            // Boş hücre var mı?
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    if (board[r][c] === 0) return true;
+                }
+            }
+
+            // Birleştirme yapılabilir mi?
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const val = board[r][c];
+                    if (c < 3 && board[r][c + 1] === val) return true;
+                    if (r < 3 && board[r + 1][c] === val) return true;
+                }
+            }
+
+            return false;
+        }
+
+        function endGame() {
+            gameOver = true;
+            const maxTile = Math.max(...board.flat());
+            if (maxTile >= 2048) {
+                gameOverMessage.textContent = '🏆 Tebrikler!';
+            } else {
+                gameOverMessage.textContent = '😔 Oyun Bitti!';
+            }
+            finalScoreEl.textContent = score;
+            gameOverModal.classList.remove('hidden');
+        }
+
+        // Klavye kontrolü
+        document.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+                const dir = e.key.replace('Arrow', '').toLowerCase();
+                move(dir);
+            }
+        });
+
+        // Touch kontrolü
+        let touchStartX, touchStartY;
+
+        boardEl.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        boardEl.addEventListener('touchend', (e) => {
+            if (!touchStartX || !touchStartY) return;
+
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+
+            if (Math.abs(dx) > Math.abs(dy)) {
+                move(dx > 0 ? 'right' : 'left');
+            } else {
+                move(dy > 0 ? 'down' : 'up');
+            }
+
+            touchStartX = null;
+            touchStartY = null;
+        }, { passive: true });
+
+        // Event Listeners
+        resetBtn.addEventListener('click', resetGame);
+        playAgainBtn.addEventListener('click', resetGame);
+        exitBtn.addEventListener('click', () => location.href = '../index.html');
+
+        init();
+    </script>
+</body>
+
+</html>

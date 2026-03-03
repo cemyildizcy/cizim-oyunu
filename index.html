@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+	<meta charset="utf-8">
+	<!-- Google AdSense -->
+	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2160219446901494"
+		crossorigin="anonymous"></script>
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Online Oyunlar — Strateji, Kart ve Parti Oyunları | cizgisavaslari.com</title>
+	<meta name="description"
+		content="Ücretsiz online oyunlar. Strateji, kart ve parti oyunları. Satranç, Go, Pişti, Vampir Köylü ve daha fazlası!">
+	<meta name="keywords"
+		content="strateji oyunları, kart oyunları, parti oyunları, online oyunlar, satranç, go, pişti, batak, vampir köylü">
+	<meta name="author" content="Cem YILDIZ">
+	<meta name="robots" content="index, follow">
+	<link rel="canonical" href="https://cizgisavaslari.com/">
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://cizgisavaslari.com/">
+	<meta property="og:title" content="Online Oyunlar — Strateji, Kart ve Parti Oyunları">
+	<meta property="og:description"
+		content="Satranç, Go, Pişti, Vampir Köylü ve daha fazlası. Arkadaşlarınla veya yapay zekaya karşı oyna!">
+	<!-- Twitter -->
+	<meta property="twitter:card" content="summary_large_image">
+	<meta property="twitter:url" content="https://cizgisavaslari.com/">
+	<meta property="twitter:title" content="Online Oyunlar — Strateji, Kart ve Parti Oyunları">
+	<meta property="twitter:description"
+		content="Satranç, Go, Pişti, Vampir Köylü ve daha fazlası. Arkadaşlarınla veya yapay zekaya karşı oyna!">
+	<link rel="stylesheet" href="style.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		/* Kategori Filtreleri */
+		.category-filters {
+			display: flex;
+			justify-content: center;
+			gap: 8px;
+			flex-wrap: wrap;
+			margin-bottom: 24px;
+			animation: fadeInUp 0.6s ease-out;
+		}
+
+		.filter-btn {
+			padding: 10px 20px;
+			background: var(--bg-card);
+			border: 1px solid var(--border);
+			border-radius: 25px;
+			color: var(--text-secondary);
+			font-size: 14px;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.filter-btn::after {
+			content: '';
+			position: absolute;
+			inset: 0;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+			transform: translateX(-100%);
+			transition: transform 0.5s;
+		}
+
+		.filter-btn:hover::after {
+			transform: translateX(100%);
+		}
+
+		.filter-btn:hover {
+			border-color: var(--neon-cyan);
+			color: var(--text);
+			transform: translateY(-2px);
+			box-shadow: 0 5px 20px rgba(0, 240, 255, 0.2);
+		}
+
+		.filter-btn.active {
+			background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+			background-size: 200% 200%;
+			animation: gradientFlow 3s ease infinite;
+			border-color: transparent;
+			color: white;
+			box-shadow: 0 5px 25px rgba(255, 45, 149, 0.4);
+		}
+
+		.filter-btn .count {
+			background: rgba(255, 255, 255, 0.2);
+			padding: 2px 8px;
+			border-radius: 12px;
+			font-size: 12px;
+			transition: transform 0.3s;
+		}
+
+		.filter-btn:hover .count {
+			transform: scale(1.1);
+		}
+
+		.filter-btn.active .count {
+			background: rgba(255, 255, 255, 0.3);
+		}
+
+		/* Oyun Kartları */
+		.games-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+			gap: 16px;
+		}
+
+		.game-card {
+			background: var(--bg-card);
+			border: 1px solid var(--border);
+			border-radius: var(--radius);
+			padding: 24px 20px;
+			text-align: center;
+			transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+			cursor: pointer;
+			position: relative;
+			overflow: hidden;
+			animation: fadeInUp 0.5s ease-out backwards;
+		}
+
+		.game-card:nth-child(1) {
+			animation-delay: 0.05s;
+		}
+
+		.game-card:nth-child(2) {
+			animation-delay: 0.1s;
+		}
+
+		.game-card:nth-child(3) {
+			animation-delay: 0.15s;
+		}
+
+		.game-card:nth-child(4) {
+			animation-delay: 0.2s;
+		}
+
+		.game-card:nth-child(5) {
+			animation-delay: 0.25s;
+		}
+
+		.game-card:nth-child(6) {
+			animation-delay: 0.3s;
+		}
+
+		.game-card:nth-child(7) {
+			animation-delay: 0.35s;
+		}
+
+		.game-card:nth-child(8) {
+			animation-delay: 0.4s;
+		}
+
+		.game-card:nth-child(9) {
+			animation-delay: 0.45s;
+		}
+
+		.game-card:nth-child(10) {
+			animation-delay: 0.5s;
+		}
+
+		.game-card:nth-child(11) {
+			animation-delay: 0.55s;
+		}
+
+		.game-card::before {
+			content: '';
+			position: absolute;
+			inset: -1px;
+			border-radius: var(--radius);
+			padding: 1px;
+			background: linear-gradient(135deg, var(--neon-pink), transparent 40%, transparent 60%, var(--neon-cyan));
+			background-size: 200% 200%;
+			-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			-webkit-mask-composite: xor;
+			mask-composite: exclude;
+			opacity: 0.3;
+			transition: opacity 0.4s ease;
+			pointer-events: none;
+		}
+
+		.game-card::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 50%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+			transition: left 0.6s ease;
+		}
+
+		.game-card:hover::after {
+			left: 150%;
+		}
+
+		.game-card:hover {
+			transform: translateY(-8px) scale(1.02);
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(168, 85, 247, 0.2);
+		}
+
+		.game-card:hover::before {
+			opacity: 1;
+			animation: borderGlowRotate 2s linear infinite;
+		}
+
+		.game-card.hidden {
+			display: none;
+		}
+
+		.game-icon {
+			width: 56px;
+			height: 56px;
+			margin: 0 auto 16px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 28px;
+			background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(0, 240, 255, 0.1));
+			border-radius: 14px;
+			border: 1px solid var(--border);
+		}
+
+		.game-card h3 {
+			font-size: 16px;
+			font-weight: 600;
+			margin-bottom: 6px;
+			color: var(--text);
+		}
+
+		.game-card p {
+			font-size: 12px;
+			color: var(--text-muted);
+			line-height: 1.4;
+			margin-bottom: 12px;
+		}
+
+		.game-tags {
+			display: flex;
+			justify-content: center;
+			gap: 6px;
+			flex-wrap: wrap;
+		}
+
+		.game-tag {
+			padding: 3px 8px;
+			background: var(--bg-secondary);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			font-size: 10px;
+			color: var(--text-muted);
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		/* Kategori Badge */
+		.category-badge {
+			position: absolute;
+			top: 12px;
+			right: 12px;
+			padding: 3px 8px;
+			border-radius: 10px;
+			font-size: 9px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.category-badge.strateji {
+			background: rgba(59, 130, 246, 0.2);
+			color: #60a5fa;
+			border: 1px solid rgba(59, 130, 246, 0.3);
+		}
+
+		.category-badge.kart {
+			background: rgba(57, 255, 20, 0.15);
+			color: #39ff14;
+			border: 1px solid rgba(57, 255, 20, 0.4);
+			text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+		}
+
+		.category-badge.parti {
+			background: rgba(255, 51, 153, 0.15);
+			color: #ff3399;
+			border: 1px solid rgba(255, 51, 153, 0.4);
+			text-shadow: 0 0 8px rgba(255, 51, 153, 0.5);
+		}
+
+		.category-badge.bulmaca {
+			background: rgba(255, 215, 0, 0.15);
+			color: #ffd700;
+			border: 1px solid rgba(255, 215, 0, 0.4);
+			text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+		}
+
+		.page {
+			max-width: 800px;
+		}
+
+		.no-results {
+			text-align: center;
+			padding: 48px 24px;
+			color: var(--text-muted);
+			display: none;
+		}
+
+		.no-results.show {
+			display: block;
+		}
+	</style>
+</head>
+
+<body>
+	<!-- Confetti Canvas -->
+	<canvas id="confettiCanvas"></canvas>
+
+	<div class="page">
+		<header class="brand">
+			<h1>🎮 OYUN KOLEKSİYONU</h1>
+			<p class="subtitle">11 ücretsiz oyun • Strateji, kart ve parti oyunları</p>
+		</header>
+
+		<!-- Player Profile Panel -->
+		<div class="player-profile" id="playerProfile">
+			<div class="profile-top">
+				<div class="profile-info">
+					<div class="profile-avatar" id="profileAvatar">🎮</div>
+					<div class="profile-details">
+						<h3 id="profileName">Oyuncu</h3>
+						<div class="level-text" id="levelText">Seviye 1</div>
+					</div>
+				</div>
+				<div class="profile-stats-mini">
+					<div class="stat-mini">
+						<div class="stat-value" id="miniGamesPlayed">0</div>
+						<div class="stat-label">Oyun</div>
+					</div>
+					<div class="stat-mini">
+						<div class="stat-value" id="miniStreak">0</div>
+						<div class="stat-label">Seri</div>
+					</div>
+				</div>
+			</div>
+			<div class="xp-bar-container">
+				<div class="xp-bar-header">
+					<span id="xpText">0 / 100 XP</span>
+					<span id="xpPercent">0%</span>
+				</div>
+				<div class="xp-bar">
+					<div class="xp-bar-fill" id="xpBarFill" style="width: 0%"></div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Stats Grid -->
+		<div class="stats-grid" id="statsGrid">
+			<div class="stat-card">
+				<div class="stat-icon">👀</div>
+				<div class="stat-number" id="statVisits">0</div>
+				<div class="stat-desc">Toplam Ziyaret</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon">🎯</div>
+				<div class="stat-number" id="statFavGame">—</div>
+				<div class="stat-desc">En Popüler Oyun</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon">🔥</div>
+				<div class="stat-number" id="statStreak">0 gün</div>
+				<div class="stat-desc">Günlük Seri</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon">⏰</div>
+				<div class="stat-number" id="statLastGame">—</div>
+				<div class="stat-desc">Son Oynanan</div>
+			</div>
+		</div>
+
+		<!-- Daily Quests -->
+		<div class="daily-quests" id="dailyQuests">
+			<div class="daily-quests-header">
+				<h3>📋 Günlük Görevler</h3>
+				<span class="reset-timer" id="questResetTimer">Yenileniyor: 00:00</span>
+			</div>
+			<div id="questList">
+				<!-- Quests will be injected here -->
+			</div>
+		</div>
+
+		<!-- Category Filters -->
+		<div class="section-divider">
+			<div class="divider-line"></div>
+			<div class="divider-title">🎮 Oyunlar</div>
+			<div class="divider-line"></div>
+		</div>
+
+		<div class="category-filters">
+			<button class="filter-btn active" data-category="all">
+				Tümü <span class="count">11</span>
+			</button>
+			<button class="filter-btn" data-category="strateji">
+				🎯 Strateji <span class="count">5</span>
+			</button>
+			<button class="filter-btn" data-category="kart">
+				🃏 Kart <span class="count">2</span>
+			</button>
+			<button class="filter-btn" data-category="parti">
+				🎉 Parti <span class="count">2</span>
+			</button>
+			<button class="filter-btn" data-category="bulmaca">
+				🧩 Bulmaca <span class="count">2</span>
+			</button>
+		</div>
+
+		<!-- Game Cards -->
+		<div class="games-grid" id="gamesGrid">
+			<!-- STRATEJİ OYUNLARI -->
+			<div class="game-card" data-category="strateji" data-game="satranc" data-url="satranc/index.html">
+				<span class="category-badge strateji">Strateji</span>
+				<div class="game-icon">♟️</div>
+				<h3>Satranç</h3>
+				<p>Kralların oyunu. Strateji ve taktikle mat et!</p>
+				<div class="game-tags">
+					<span class="game-tag">2 Oyuncu</span>
+					<span class="game-tag">AI</span>
+				</div>
+			</div>
+
+			<div class="game-card" data-category="strateji" data-game="go" data-url="go/index.html">
+				<span class="category-badge strateji">Strateji</span>
+				<div class="game-icon">⚫</div>
+				<h3>Go (Baduk)</h3>
+				<p>Dünyanın en eski strateji oyunu. Alan kap!</p>
+				<div class="game-tags">
+					<span class="game-tag">2 Oyuncu</span>
+					<span class="game-tag">9×9</span>
+				</div>
+			</div>
+
+			<div class="game-card" data-category="strateji" data-game="dama" data-url="dama/index.html">
+				<span class="category-badge strateji">Strateji</span>
+				<div class="game-icon">🔴</div>
+				<h3>Dama</h3>
+				<p>Klasik tahta oyunu. Tüm rakip taşları ye!</p>
+				<div class="game-tags">
+					<span class="game-tag">2 Oyuncu</span>
+					<span class="game-tag">AI</span>
+				</div>
+			</div>
+
+			<div class="game-card" data-category="strateji" data-game="amiralbatti" data-url="amiralbatti/index.html">
+				<span class="category-badge strateji">Strateji</span>
+				<div class="game-icon">🚢</div>
+				<h3>Amiral Battı</h3>
+				<p>Deniz savaşı. Düşman gemilerini batır!</p>
+				<div class="game-tags">
+					<span class="game-tag">2 Oyuncu</span>
+					<span class="game-tag">AI</span>
+				</div>
+			</div>
+
+			<div class="game-card" data-category="strateji" data-game="cizgi" data-url="cizgi/index.html">
+				<span class="category-badge strateji">Strateji</span>
+				<div class="game-icon">✏️</div>
+				<h3>Çizgi Savaşları</h3>
+				<p>Çizgi çek, kare kapat, puan topla!</p>
+				<div class="game-tags">
+					<span class="game-tag">2 Oyuncu</span>
+					<span class="game-tag">Online</span>
+				</div>
+			</div>
+
+			<!-- KART OYUNLARI -->
+			<div class="game-card" data-category="kart" data-game="pisti" data-url="pisti/index.html">
+				<span class="category-badge kart">Kart</span>
+				<div class="game-icon">🃏</div>
+				<h3>Pişti</h3>
+				<p>Türk klasiği. Vale ile pişti yap!</p>
+				<div class="game-tags">
+					<span class="game-tag">2 Oyuncu</span>
+					<span class="game-tag">AI</span>
+				</div>
+			</div>
+
+			<div class="game-card" data-category="kart" data-game="batak" data-url="batak/index.html">
+				<span class="category-badge kart">Kart</span>
+				<div class="game-icon">🃏</div>
+				<h3>Batak</h3>
+				<p>4 kişilik koz oyunu. El topla!</p>
+				<div class="game-tags">
+					<span class="game-tag">4 Oyuncu</span>
+					<span class="game-tag">AI</span>
+				</div>
+			</div>
+
+			<!-- PARTİ OYUNLARI -->
+			<div class="game-card" data-category="parti" data-game="vampir-koylu" data-url="vampir-koylu/index.html">
+				<span class="category-badge parti">Parti</span>
+				<div class="game-icon">🧛</div>
+				<h3>Vampir Köylü</h3>
+				<p>Sosyal dedektif oyunu. Vampiri bul!</p>
+				<div class="game-tags">
+					<span class="game-tag">4-12 Oyuncu</span>
+				</div>
+			</div>
+
+			<div class="game-card" data-category="parti" data-game="kelime-oyunu" data-url="kelime-oyunu/index.html">
+				<span class="category-badge parti">Parti</span>
+				<div class="game-icon">🎯</div>
+				<h3>Kelime Oyunu</h3>
+				<p>Tabu tarzı. Yasaklı kelimelere dikkat!</p>
+				<div class="game-tags">
+					<span class="game-tag">2+ Takım</span>
+				</div>
+			</div>
+
+			<!-- BULMACA OYUNLARI -->
+			<div class="game-card" data-category="bulmaca" data-game="2048" data-url="2048/index.html">
+				<span class="category-badge bulmaca">Bulmaca</span>
+				<div class="game-icon">🔢</div>
+				<h3>2048</h3>
+				<p>Sayıları birleştir, 2048'e ulaş!</p>
+				<div class="game-tags">
+					<span class="game-tag">Tek Oyuncu</span>
+				</div>
+			</div>
+
+			<div class="game-card" data-category="bulmaca" data-game="xox" data-url="xox/index.html">
+				<span class="category-badge bulmaca">Bulmaca</span>
+				<div class="game-icon">❌⭕</div>
+				<h3>XOX</h3>
+				<p>Klasik tic-tac-toe. AI'ı yenebilir misin?</p>
+				<div class="game-tags">
+					<span class="game-tag">2 Oyuncu</span>
+					<span class="game-tag">Hızlı</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="no-results" id="noResults">
+			😕 Bu kategoride oyun bulunamadı.
+		</div>
+
+		<!-- Achievements Section -->
+		<div class="achievements-section" id="achievementsSection">
+			<div class="achievements-header">
+				<h3>🏆 Başarımlar</h3>
+				<span class="ach-count" id="achCount">0 / 6</span>
+			</div>
+			<div class="achievements-grid" id="achievementsGrid">
+				<!-- Injected by JS -->
+			</div>
+		</div>
+
+		<footer class="footer">
+			<div class="footer-links">
+				<a href="blog/index.html">📝 Blog</a>
+				<a href="hakkimizda.html">Hakkımızda</a>
+				<a href="iletisim.html">İletişim</a>
+				<a href="gizlilik.html">Gizlilik Politikası</a>
+				<a href="kullanim-kosullari.html">Kullanım Koşulları</a>
+			</div>
+			<div class="footer-copyright">© 2026 Cem YILDIZ — cizgisavaslari.com</div>
+		</footer>
+	</div>
+
+	<!-- Welcome Modal -->
+	<div class="welcome-modal hidden" id="welcomeModal">
+		<div class="welcome-content">
+			<div class="welcome-emoji">🎮</div>
+			<h2>Hoş Geldin!</h2>
+			<p>Oyun koleksiyonuna katıl, seviye atla, başarımlar kazan!</p>
+			<input type="text" class="welcome-input" id="welcomeNameInput" placeholder="Adını yaz..." maxlength="20"
+				autofocus>
+			<button class="btn primary" id="welcomeStartBtn">Başlayalım! 🚀</button>
+		</div>
+	</div>
+
+	<script>
+		// ================================================
+		// 🎮 OYUN PORTAL — LEVEL / XP / QUEST SİSTEMİ
+		// ================================================
+
+		const GAME_NAMES = {
+			'satranc': 'Satranç', 'go': 'Go', 'dama': 'Dama',
+			'amiralbatti': 'Amiral Battı', 'cizgi': 'Çizgi Savaşları',
+			'pisti': 'Pişti', 'batak': 'Batak',
+			'vampir-koylu': 'Vampir Köylü', 'kelime-oyunu': 'Kelime Oyunu',
+			'2048': '2048', 'xox': 'XOX'
+		};
+
+		const ACHIEVEMENTS = [
+			{ id: 'first_game', icon: '🎮', name: 'İlk Adım', desc: 'İlk oyunu oyna' },
+			{ id: '3_day_streak', icon: '🔥', name: '3 Gün Serisi', desc: '3 gün üst üste gir' },
+			{ id: 'collector', icon: '⭐', name: 'Koleksiyoncu', desc: '5 farklı oyun oyna' },
+			{ id: 'veteran', icon: '🏆', name: 'Veteran', desc: 'Level 10\'a ulaş' },
+			{ id: 'legend', icon: '💎', name: 'Efsane', desc: 'Level 25\'e ulaş' },
+			{ id: 'all_categories', icon: '🌈', name: 'Kaşif', desc: 'Her kategoriden oyna' }
+		];
+
+		const QUEST_TEMPLATES = [
+			{ id: 'play_3', title: '3 farklı oyun oyna', target: 3, reward: 50, type: 'unique_games' },
+			{ id: 'play_strateji', title: 'Strateji oyunu oyna', target: 1, reward: 30, type: 'category', category: 'strateji' },
+			{ id: 'play_any_5', title: '5 oyun aç', target: 5, reward: 40, type: 'total_clicks' },
+		];
+
+		// ================================================
+		// STORAGE HELPERS
+		// ================================================
+
+		function getData() {
+			const defaults = {
+				playerName: '',
+				playerXP: 0,
+				playerLevel: 1,
+				totalVisits: 0,
+				dailyStreak: 0,
+				lastVisitDate: '',
+				gamesPlayed: [],
+				gameClickCounts: {},
+				achievements: [],
+				todayGamesPlayed: [],
+				todayTotalClicks: 0,
+				dailyQuests: null
+			};
+			try {
+				const stored = JSON.parse(localStorage.getItem('oyunPortalData') || '{}');
+				return { ...defaults, ...stored };
+			} catch {
+				return defaults;
+			}
+		}
+
+		function saveData(data) {
+			localStorage.setItem('oyunPortalData', JSON.stringify(data));
+		}
+
+		// ================================================
+		// XP / LEVEL SYSTEM
+		// ================================================
+
+		function getRequiredXP(level) {
+			return level * 100;
+		}
+
+		function addXP(amount, reason) {
+			const data = getData();
+			data.playerXP += amount;
+
+			// Check for level up
+			let leveledUp = false;
+			while (data.playerXP >= getRequiredXP(data.playerLevel)) {
+				data.playerXP -= getRequiredXP(data.playerLevel);
+				data.playerLevel++;
+				leveledUp = true;
+			}
+
+			saveData(data);
+			updateProfileUI(data);
+			showXPToast(amount, reason);
+
+			if (leveledUp) {
+				setTimeout(() => showLevelUpEffect(data.playerLevel), 500);
+				checkAchievements(data);
+			}
+
+			return data;
+		}
+
+		function showXPToast(amount, reason) {
+			const existing = document.querySelector('.xp-toast');
+			if (existing) existing.remove();
+
+			const toast = document.createElement('div');
+			toast.className = 'xp-toast';
+			toast.innerHTML = `⚡ +${amount} XP — ${reason}`;
+			document.body.appendChild(toast);
+
+			setTimeout(() => toast.remove(), 3200);
+		}
+
+		function showLevelUpEffect(level) {
+			const overlay = document.createElement('div');
+			overlay.className = 'levelup-overlay';
+			overlay.innerHTML = `
+				<div class="levelup-content">
+					<div class="level-number">${level}</div>
+					<div class="levelup-text">SEVİYE ATLADIN!</div>
+					<div class="levelup-sub">Tebrikler! Yeni seviyeye ulaştın 🎉</div>
+				</div>
+			`;
+			document.body.appendChild(overlay);
+			launchConfetti();
+
+			overlay.addEventListener('click', () => overlay.remove());
+			setTimeout(() => overlay.remove(), 3500);
+		}
+
+		// ================================================
+		// CONFETTI EFFECT
+		// ================================================
+
+		function launchConfetti() {
+			const canvas = document.getElementById('confettiCanvas');
+			const ctx = canvas.getContext('2d');
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+
+			const colors = ['#ff3399', '#00ffff', '#bf5fff', '#ffd700', '#39ff14', '#ff6b35'];
+			const particles = [];
+
+			for (let i = 0; i < 150; i++) {
+				particles.push({
+					x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+					y: canvas.height / 2,
+					vx: (Math.random() - 0.5) * 15,
+					vy: (Math.random() - 1) * 20 - 5,
+					color: colors[Math.floor(Math.random() * colors.length)],
+					size: Math.random() * 8 + 3,
+					rotation: Math.random() * 360,
+					rotSpeed: (Math.random() - 0.5) * 10,
+					gravity: 0.3 + Math.random() * 0.2,
+					opacity: 1
+				});
+			}
+
+			let frame = 0;
+			function animate() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				let active = false;
+
+				particles.forEach(p => {
+					p.x += p.vx;
+					p.vy += p.gravity;
+					p.y += p.vy;
+					p.rotation += p.rotSpeed;
+					p.opacity -= 0.008;
+					p.vx *= 0.99;
+
+					if (p.opacity > 0 && p.y < canvas.height + 50) {
+						active = true;
+						ctx.save();
+						ctx.translate(p.x, p.y);
+						ctx.rotate(p.rotation * Math.PI / 180);
+						ctx.globalAlpha = Math.max(0, p.opacity);
+						ctx.fillStyle = p.color;
+						ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+						ctx.restore();
+					}
+				});
+
+				frame++;
+				if (active && frame < 200) {
+					requestAnimationFrame(animate);
+				} else {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+				}
+			}
+			animate();
+		}
+
+		// ================================================
+		// DAILY QUESTS
+		// ================================================
+
+		function getTodayStr() {
+			return new Date().toISOString().split('T')[0];
+		}
+
+		function initDailyQuests(data) {
+			const today = getTodayStr();
+			if (!data.dailyQuests || data.dailyQuests.date !== today) {
+				data.dailyQuests = {
+					date: today,
+					quests: QUEST_TEMPLATES.map(q => ({
+						id: q.id, progress: 0, target: q.target,
+						reward: q.reward, done: false, claimed: false
+					}))
+				};
+				data.todayGamesPlayed = [];
+				data.todayTotalClicks = 0;
+				saveData(data);
+			}
+			return data;
+		}
+
+		function updateQuestProgress(data) {
+			if (!data.dailyQuests) return data;
+
+			const quests = data.dailyQuests.quests;
+
+			// Quest 0: 3 unique games
+			quests[0].progress = Math.min((data.todayGamesPlayed || []).length, quests[0].target);
+			// Quest 1: play strateji
+			const stratejiGames = ['satranc', 'go', 'dama', 'amiralbatti', 'cizgi'];
+			const playedStrateji = (data.todayGamesPlayed || []).filter(g => stratejiGames.includes(g)).length;
+			quests[1].progress = Math.min(playedStrateji, quests[1].target);
+			// Quest 2: 5 total clicks
+			quests[2].progress = Math.min(data.todayTotalClicks || 0, quests[2].target);
+
+			quests.forEach(q => {
+				if (q.progress >= q.target && !q.done) {
+					q.done = true;
+					if (!q.claimed) {
+						q.claimed = true;
+						addXP(q.reward, 'Görev tamamlandı!');
+					}
+				}
+			});
+
+			saveData(data);
+			return data;
+		}
+
+		function renderQuests(data) {
+			const container = document.getElementById('questList');
+			if (!data.dailyQuests) return;
+
+			container.innerHTML = data.dailyQuests.quests.map((q, i) => {
+				const template = QUEST_TEMPLATES[i];
+				const percent = Math.min(100, (q.progress / q.target) * 100);
+				const done = q.done;
+				return `
+					<div class="quest-item ${done ? 'completed' : ''}">
+						<div class="quest-check">${done ? '✓' : ''}</div>
+						<div class="quest-info">
+							<div class="quest-title">${template.title}</div>
+							<div class="quest-progress-text">${q.progress} / ${q.target}</div>
+							<div class="quest-progress-bar">
+								<div class="quest-progress-fill" style="width: ${percent}%"></div>
+							</div>
+						</div>
+						<div class="quest-reward">+${q.reward} XP</div>
+					</div>
+				`;
+			}).join('');
+
+			// Update reset timer
+			updateQuestTimer();
+		}
+
+		function updateQuestTimer() {
+			const now = new Date();
+			const tomorrow = new Date(now);
+			tomorrow.setDate(tomorrow.getDate() + 1);
+			tomorrow.setHours(0, 0, 0, 0);
+
+			const diff = tomorrow - now;
+			const hours = Math.floor(diff / (1000 * 60 * 60));
+			const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+			document.getElementById('questResetTimer').textContent =
+				`Yenileniyor: ${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+		}
+
+		// ================================================
+		// ACHIEVEMENTS
+		// ================================================
+
+		function checkAchievements(data) {
+			const earned = data.achievements || [];
+			const newAch = [];
+
+			// First game
+			if (!earned.includes('first_game') && (data.gamesPlayed || []).length > 0) {
+				newAch.push('first_game');
+			}
+			// 3 day streak
+			if (!earned.includes('3_day_streak') && data.dailyStreak >= 3) {
+				newAch.push('3_day_streak');
+			}
+			// Collector - 5 different games
+			if (!earned.includes('collector') && (data.gamesPlayed || []).length >= 5) {
+				newAch.push('collector');
+			}
+			// Veteran - Level 10
+			if (!earned.includes('veteran') && data.playerLevel >= 10) {
+				newAch.push('veteran');
+			}
+			// Legend - Level 25
+			if (!earned.includes('legend') && data.playerLevel >= 25) {
+				newAch.push('legend');
+			}
+			// All categories
+			if (!earned.includes('all_categories')) {
+				const cats = { strateji: false, kart: false, parti: false, bulmaca: false };
+				const catMap = {
+					satranc: 'strateji', go: 'strateji', dama: 'strateji',
+					amiralbatti: 'strateji', cizgi: 'strateji',
+					pisti: 'kart', batak: 'kart',
+					'vampir-koylu': 'parti', 'kelime-oyunu': 'parti',
+					'2048': 'bulmaca', xox: 'bulmaca'
+				};
+				(data.gamesPlayed || []).forEach(g => {
+					if (catMap[g]) cats[catMap[g]] = true;
+				});
+				if (Object.values(cats).every(v => v)) {
+					newAch.push('all_categories');
+				}
+			}
+
+			if (newAch.length > 0) {
+				data.achievements = [...earned, ...newAch];
+				saveData(data);
+				newAch.forEach(id => {
+					const ach = ACHIEVEMENTS.find(a => a.id === id);
+					if (ach) {
+						setTimeout(() => showXPToast(0, `Başarım açıldı: ${ach.icon} ${ach.name}`), 200);
+					}
+				});
+			}
+
+			renderAchievements(data);
+			return data;
+		}
+
+		function renderAchievements(data) {
+			const grid = document.getElementById('achievementsGrid');
+			const earned = data.achievements || [];
+			const count = earned.length;
+
+			document.getElementById('achCount').textContent = `${count} / ${ACHIEVEMENTS.length}`;
+
+			grid.innerHTML = ACHIEVEMENTS.map(ach => {
+				const unlocked = earned.includes(ach.id);
+				return `
+					<div class="achievement-badge ${unlocked ? 'unlocked' : 'locked'}">
+						<div class="achievement-icon">${unlocked ? ach.icon : '🔒'}</div>
+						<div class="achievement-name">${ach.name}</div>
+						<div class="achievement-desc">${ach.desc}</div>
+					</div>
+				`;
+			}).join('');
+		}
+
+		// ================================================
+		// PROFILE UI
+		// ================================================
+
+		function updateProfileUI(data) {
+			document.getElementById('profileName').textContent = data.playerName || 'Oyuncu';
+			document.getElementById('levelText').textContent = `Seviye ${data.playerLevel}`;
+
+			const avatars = ['🎮', '⚔️', '👑', '🏆', '💎', '🔥', '🌟', '🚀'];
+			const avIdx = Math.min(Math.floor(data.playerLevel / 5), avatars.length - 1);
+			document.getElementById('profileAvatar').textContent = avatars[avIdx];
+
+			document.getElementById('miniGamesPlayed').textContent = (data.gamesPlayed || []).length;
+			document.getElementById('miniStreak').textContent = data.dailyStreak || 0;
+
+			const required = getRequiredXP(data.playerLevel);
+			const percent = Math.round((data.playerXP / required) * 100);
+			document.getElementById('xpText').textContent = `${data.playerXP} / ${required} XP`;
+			document.getElementById('xpPercent').textContent = `${percent}%`;
+			document.getElementById('xpBarFill').style.width = percent + '%';
+		}
+
+		function updateStatsUI(data) {
+			document.getElementById('statVisits').textContent = data.totalVisits || 0;
+			document.getElementById('statStreak').textContent = (data.dailyStreak || 0) + ' gün';
+
+			// Find most played game
+			const clicks = data.gameClickCounts || {};
+			const sorted = Object.entries(clicks).sort((a, b) => b[1] - a[1]);
+			if (sorted.length > 0) {
+				document.getElementById('statFavGame').textContent = GAME_NAMES[sorted[0][0]] || sorted[0][0];
+			}
+
+			// Last played
+			const played = data.gamesPlayed || [];
+			if (played.length > 0) {
+				const lastGame = data.lastPlayedGame || played[played.length - 1];
+				document.getElementById('statLastGame').textContent = GAME_NAMES[lastGame] || lastGame;
+			}
+		}
+
+		// ================================================
+		// GAME CARD BADGES & CLICK HANDLING
+		// ================================================
+
+		function updateGameCardBadges(data) {
+			const cards = document.querySelectorAll('.game-card');
+			cards.forEach(card => {
+				const game = card.dataset.game;
+				const played = (data.gamesPlayed || []).includes(game);
+				const clicks = (data.gameClickCounts || {})[game] || 0;
+
+				// Remove old badges
+				card.querySelectorAll('.played-badge, .click-count').forEach(el => el.remove());
+
+				if (played) {
+					const badge = document.createElement('span');
+					badge.className = 'played-badge';
+					badge.textContent = '✓ Oynandı';
+					card.appendChild(badge);
+				}
+
+				if (clicks > 0) {
+					const countEl = document.createElement('div');
+					countEl.className = 'click-count';
+					countEl.textContent = `${clicks} kez oynandı`;
+					card.appendChild(countEl);
+				}
+			});
+		}
+
+		function setupGameCardClicks() {
+			const cards = document.querySelectorAll('.game-card');
+			cards.forEach(card => {
+				card.addEventListener('click', () => {
+					const game = card.dataset.game;
+					const url = card.dataset.url;
+					const category = card.dataset.category;
+
+					let data = getData();
+
+					// Track click
+					if (!data.gameClickCounts) data.gameClickCounts = {};
+					data.gameClickCounts[game] = (data.gameClickCounts[game] || 0) + 1;
+
+					// Track unique games played
+					if (!data.gamesPlayed) data.gamesPlayed = [];
+					if (!data.gamesPlayed.includes(game)) {
+						data.gamesPlayed.push(game);
+					}
+
+					// Today tracking for quests
+					if (!data.todayGamesPlayed) data.todayGamesPlayed = [];
+					if (!data.todayGamesPlayed.includes(game)) {
+						data.todayGamesPlayed.push(game);
+					}
+					data.todayTotalClicks = (data.todayTotalClicks || 0) + 1;
+					data.lastPlayedGame = game;
+
+					saveData(data);
+
+					// Add XP
+					addXP(10, GAME_NAMES[game] + ' oynandı');
+
+					// Check quests & achievements
+					data = getData();
+					data = updateQuestProgress(data);
+					checkAchievements(data);
+					renderQuests(data);
+
+					// Navigate after short delay for XP animation
+					setTimeout(() => {
+						window.location.href = url;
+					}, 300);
+				});
+			});
+		}
+
+		// ================================================
+		// DAILY STREAK
+		// ================================================
+
+		function updateDailyStreak(data) {
+			const today = getTodayStr();
+			const yesterday = new Date();
+			yesterday.setDate(yesterday.getDate() - 1);
+			const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+			if (data.lastVisitDate === today) {
+				// Already visited today
+				return data;
+			}
+
+			if (data.lastVisitDate === yesterdayStr) {
+				data.dailyStreak = (data.dailyStreak || 0) + 1;
+			} else if (data.lastVisitDate !== today) {
+				data.dailyStreak = 1;
+			}
+
+			data.lastVisitDate = today;
+			data.totalVisits = (data.totalVisits || 0) + 1;
+			saveData(data);
+			return data;
+		}
+
+		// ================================================
+		// WELCOME MODAL
+		// ================================================
+
+		function showWelcomeModal() {
+			const modal = document.getElementById('welcomeModal');
+			modal.classList.remove('hidden');
+
+			const input = document.getElementById('welcomeNameInput');
+			const btn = document.getElementById('welcomeStartBtn');
+
+			const startGame = () => {
+				const name = input.value.trim() || 'Oyuncu';
+				let data = getData();
+				data.playerName = name;
+				data.lastVisitDate = getTodayStr();
+				data.totalVisits = 1;
+				data.dailyStreak = 1;
+				saveData(data);
+
+				modal.classList.add('hidden');
+				initApp();
+				addXP(25, 'Hoş geldin bonusu!');
+				launchConfetti();
+			};
+
+			btn.addEventListener('click', startGame);
+			input.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') startGame();
+			});
+		}
+
+		function showDailyBonus() {
+			const data = getData();
+			const today = getTodayStr();
+
+			if (data.lastVisitDate !== today) {
+				// Give daily bonus after streak update
+				setTimeout(() => {
+					addXP(25, 'Günlük giriş bonusu!');
+				}, 800);
+			}
+		}
+
+		// ================================================
+		// CATEGORY FILTER
+		// ================================================
+
+		function setupFilters() {
+			const filterBtns = document.querySelectorAll('.filter-btn');
+			const gameCards = document.querySelectorAll('.game-card');
+			const noResults = document.getElementById('noResults');
+
+			filterBtns.forEach(btn => {
+				btn.addEventListener('click', () => {
+					filterBtns.forEach(b => b.classList.remove('active'));
+					btn.classList.add('active');
+
+					const category = btn.dataset.category;
+					let visibleCount = 0;
+
+					gameCards.forEach(card => {
+						if (category === 'all' || card.dataset.category === category) {
+							card.classList.remove('hidden');
+							visibleCount++;
+						} else {
+							card.classList.add('hidden');
+						}
+					});
+
+					noResults.classList.toggle('show', visibleCount === 0);
+				});
+			});
+		}
+
+		// ================================================
+		// TIME ON SITE TRACKER (for quest)
+		// ================================================
+
+		let siteTimeSeconds = 0;
+		function startSiteTimer() {
+			setInterval(() => {
+				siteTimeSeconds++;
+			}, 1000);
+
+			// Update quest timer every minute
+			setInterval(() => {
+				updateQuestTimer();
+			}, 60000);
+		}
+
+		// ================================================
+		// INIT
+		// ================================================
+
+		function initApp() {
+			let data = getData();
+
+			// Daily streak
+			const today = getTodayStr();
+			const isNewDay = data.lastVisitDate !== today;
+
+			if (isNewDay) {
+				showDailyBonus();
+			}
+
+			data = updateDailyStreak(data);
+			data = initDailyQuests(data);
+			data = updateQuestProgress(data);
+
+			updateProfileUI(data);
+			updateStatsUI(data);
+			renderQuests(data);
+			renderAchievements(data);
+			updateGameCardBadges(data);
+			setupGameCardClicks();
+			setupFilters();
+			startSiteTimer();
+
+			// Check achievements on load
+			checkAchievements(getData());
+		}
+
+		// ================================================
+		// BOOT
+		// ================================================
+
+		(function boot() {
+			const data = getData();
+			if (!data.playerName) {
+				showWelcomeModal();
+			} else {
+				initApp();
+			}
+		})();
+	</script>
+
+	<!-- Cookie Consent -->
+	<script src="cookie-consent.js"></script>
+</body>
+
+</html>

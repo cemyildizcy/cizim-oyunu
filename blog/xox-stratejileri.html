@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2160219446901494"
+        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>XOX Kazanma Taktikleri — Hiç Kaybetmemenin Matematiği</title>
+    <meta name="description"
+        content="XOX (Tic-tac-toe) nasıl her zaman kazanılır veya berabere kalınır? Optimal oyun stratejisi ve matematiksel analiz.">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .article {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .article-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .article-title {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .article-meta {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .article-content {
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .article-content h2 {
+            color: var(--text);
+            margin: 32px 0 16px;
+            font-size: 20px;
+        }
+
+        .article-content p {
+            margin-bottom: 16px;
+        }
+
+        .article-content ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+
+        .article-content li {
+            margin-bottom: 8px;
+        }
+
+        .grid-example {
+            display: grid;
+            grid-template-columns: repeat(3, 50px);
+            gap: 4px;
+            margin: 16px 0;
+        }
+
+        .grid-example div {
+            width: 50px;
+            height: 50px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .success-box {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .cta-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            margin: 32px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page article">
+        <header class="article-header">
+            <div class="article-meta">❌⭕ XOX • 3 dk okuma</div>
+            <h1 class="article-title">XOX Kazanma Taktikleri</h1>
+            <p style="color:var(--text-muted)">Hiç Kaybetmemenin Matematiği</p>
+        </header>
+
+        <article class="article-content">
+            <p>XOX (Tic-tac-toe), matematiksel olarak "çözülmüş" bir oyundur. İki mükemmel oyuncu arasında her zaman
+                berabere biter. İşte asla kaybetmemenin yolu:</p>
+
+            <h2>X Olarak Oynuyorsanız</h2>
+            <ol>
+                <li><strong>Merkeze başlayın:</strong> Merkez (5. kare) en güçlü açılıştır. 8 olası kazanma yolundan
+                    4'üne erişim sağlar.</li>
+                <li><strong>Köşeleri tercih edin:</strong> Merkez alındıysa, bir köşeye gidin. Köşeler 3 kazanma yoluna
+                    erişim sağlar.</li>
+                <li><strong>Çatal oluşturun:</strong> İki farklı yönde aynı anda tehdit oluşturun. Rakip her ikisini de
+                    engelleyemez.</li>
+            </ol>
+
+            <h2>O Olarak Oynuyorsanız</h2>
+            <ol>
+                <li><strong>X merkeze oynadıysa:</strong> Mutlaka bir köşeye oynayın. Kenar seçerseniz kaybedersiniz!
+                </li>
+                <li><strong>X köşeye oynadıysa:</strong> Merkezi alın. Sonra X'in çatalını engellemeye odaklanın.</li>
+                <li><strong>Savunma öncelikli:</strong> O olarak kazanmak zordur, hedef berabere kalmaktır.</li>
+            </ol>
+
+            <div class="success-box">
+                <strong>🎯 Altın Kural:</strong> Her zaman önce rakibin kazanmasını engelleyin, sonra kendi kazanma
+                yolunuzu arayın.
+            </div>
+
+            <h2>Optimal Oyun Stratejisi</h2>
+            <p>Şu sıralamaya göre hamle yapın:</p>
+            <ol>
+                <li><strong>Kazan:</strong> 3'lü tamamlayabiliyorsanız yapın</li>
+                <li><strong>Engelle:</strong> Rakip 3'lü yapacaksa engelleyin</li>
+                <li><strong>Çatal:</strong> İki tehdit oluşturun</li>
+                <li><strong>Çatalı Engelle:</strong> Rakibin çatalını önleyin</li>
+                <li><strong>Merkez:</strong> Boşsa merkezi alın</li>
+                <li><strong>Karşı Köşe:</strong> Rakibin köşesinin karşısını alın</li>
+                <li><strong>Boş Köşe:</strong> Herhangi bir köşe</li>
+                <li><strong>Boş Kenar:</strong> Herhangi bir kenar</li>
+            </ol>
+
+            <div class="cta-box">
+                <p style="margin-bottom:16px">❌⭕ Yenilmez AI'a karşı kendinizi test edin!</p>
+                <a href="../xox/index.html" class="btn primary">Hemen Oyna</a>
+            </div>
+        </article>
+
+        <div style="text-align:center;margin-top:32px">
+            <a href="index.html" class="btn ghost">← Blog'a Dön</a>
+        </div>
+
+        <footer class="footer">© Cem YILDIZ</footer>
+    </div>
+</body>
+
+</html>
