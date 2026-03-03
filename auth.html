@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Giriş Yap — cizgisavaslari.com</title>
+    <meta name="description" content="Oyun koleksiyonuna giriş yap veya kayıt ol. Seviye atla, başarım kazan!">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .auth-container {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 20px 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 36px 28px;
+            position: relative;
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: var(--radius);
+            padding: 1px;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple), var(--neon-cyan));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .auth-header .auth-emoji {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+            animation: bounce 2s ease infinite;
+        }
+
+        .auth-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple), var(--neon-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+        }
+
+        .auth-header p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Tab Switcher */
+        .auth-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .auth-tab.active {
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 45, 149, 0.3);
+        }
+
+        .auth-tab:not(.active):hover {
+            color: var(--text);
+        }
+
+        /* Form */
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 15px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--neon-purple);
+            box-shadow: var(--glow-purple);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .auth-error {
+            background: rgba(255, 23, 68, 0.1);
+            border: 1px solid rgba(255, 23, 68, 0.3);
+            color: var(--neon-red);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+            animation: fadeInUp 0.2s ease;
+        }
+
+        .auth-error.show {
+            display: block;
+        }
+
+        .auth-success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--success);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .auth-success.show {
+            display: block;
+        }
+
+        .forgot-link {
+            display: block;
+            text-align: right;
+            font-size: 12px;
+            color: var(--neon-cyan);
+            text-decoration: none;
+            margin-top: -8px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .forgot-link:hover {
+            opacity: 0.8;
+        }
+
+        /* Divider */
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .auth-divider .line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .auth-divider span {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Guest Button */
+        .guest-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .guest-btn:hover {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.15);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .auth-footer a {
+            color: var(--neon-cyan);
+            text-decoration: none;
+        }
+
+        /* Loading spinner */
+        .auth-loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .auth-loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--neon-purple);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 28px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <span class="auth-emoji">🎮</span>
+                <h1>Oyun Koleksiyonu</h1>
+                <p>Giriş yap, seviye atla, sıralamada yüksel!</p>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Giriş Yap</button>
+                <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Kayıt Ol</button>
+            </div>
+
+            <!-- Error / Success Messages -->
+            <div class="auth-error" id="authError"></div>
+            <div class="auth-success" id="authSuccess"></div>
+
+            <!-- Loading -->
+            <div class="auth-loading" id="authLoading">
+                <div class="spinner"></div>
+                <p style="color: var(--text-muted); font-size: 14px;">İşleniyor...</p>
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>E-posta</label>
+                    <input type="email" id="loginEmail" placeholder="ornek@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Şifre</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required minlength="6">
+                </div>
+                <a class="forgot-link" onclick="handleForgotPassword()">Şifremi Unuttum</a>
+                <button type="submit" class="btn primary">Giriş Yap 🚀</button>
+            </form>
+
+            <!-- Signup Form -->
+            <form class="auth-form" id="signupForm" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="signupName" placeholder="Oyuncu adın" required maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label>E-posta</label>
+                    <input type="email" id="signupEmail" placeholder="ornek@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Şifre</label>
+                    <input type="password" id="signupPassword" placeholder="En az 6 karakter" required minlength="6">
+                </div>
+                <button type="submit" class="btn primary">Kayıt Ol ✨</button>
+            </form>
+
+            <!-- Divider -->
+            <div class="auth-divider">
+                <div class="line"></div>
+                <span>veya</span>
+                <div class="line"></div>
+            </div>
+
+            <!-- Guest Login -->
+            <button class="guest-btn" onclick="handleGuestLogin()">
+                👤 Misafir Olarak Devam Et
+            </button>
+
+            <div class="auth-footer">
+                <a href="index.html">← Ana Sayfaya Dön</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        // If already logged in, redirect
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Tab switching
+        function switchTab(tab) {
+            document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+            document.getElementById('tabSignup').classList.toggle('active', tab === 'signup');
+            document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+            document.getElementById('signupForm').classList.toggle('active', tab === 'signup');
+            hideMessages();
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('authError');
+            el.textContent = msg;
+            el.classList.add('show');
+            document.getElementById('authSuccess').classList.remove('show');
+        }
+
+        function showSuccess(msg) {
+            const el = document.getElementById('authSuccess');
+            el.textContent = msg;
+            el.classList.add('show');
+            document.getElementById('authError').classList.remove('show');
+        }
+
+        function hideMessages() {
+            document.getElementById('authError').classList.remove('show');
+            document.getElementById('authSuccess').classList.remove('show');
+        }
+
+        function showLoading(show) {
+            document.getElementById('authLoading').classList.toggle('show', show);
+            document.getElementById('loginForm').style.display = show ? 'none' : '';
+            document.getElementById('signupForm').style.display = show ? 'none' : '';
+        }
+
+        function getErrorMessage(code) {
+            const messages = {
+                'auth/email-already-in-use': 'Bu e-posta zaten kayıtlı.',
+                'auth/invalid-email': 'Geçersiz e-posta adresi.',
+                'auth/user-not-found': 'Bu e-posta ile kayıtlı kullanıcı bulunamadı.',
+                'auth/wrong-password': 'Yanlış şifre.',
+                'auth/weak-password': 'Şifre en az 6 karakter olmalı.',
+                'auth/too-many-requests': 'Çok fazla deneme. Lütfen biraz bekleyin.',
+                'auth/invalid-credential': 'E-posta veya şifre hatalı.',
+                'auth/network-request-failed': 'İnternet bağlantınızı kontrol edin.',
+            };
+            return messages[code] || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+        }
+
+        // Login
+        async function handleLogin(e) {
+            e.preventDefault();
+            hideMessages();
+            showLoading(true);
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                // onAuthStateChanged will redirect
+            } catch (error) {
+                showLoading(false);
+                showError(getErrorMessage(error.code));
+            }
+        }
+
+        // Signup
+        async function handleSignup(e) {
+            e.preventDefault();
+            hideMessages();
+            showLoading(true);
+
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            try {
+                const result = await auth.createUserWithEmailAndPassword(email, password);
+                await result.user.updateProfile({ displayName: name });
+                await initUserInDB();
+                // onAuthStateChanged will redirect
+            } catch (error) {
+                showLoading(false);
+                showError(getErrorMessage(error.code));
+            }
+        }
+
+        // Guest Login
+        async function handleGuestLogin() {
+            hideMessages();
+            showLoading(true);
+
+            try {
+                await auth.signInAnonymously();
+                await initUserInDB();
+                // onAuthStateChanged will redirect
+            } catch (error) {
+                showLoading(false);
+                showError(getErrorMessage(error.code));
+            }
+        }
+
+        // Forgot Password
+        async function handleForgotPassword() {
+            const email = document.getElementById('loginEmail').value;
+            if (!email) {
+                showError('Lütfen önce e-posta adresinizi girin.');
+                return;
+            }
+
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showSuccess('Şifre sıfırlama linki gönderildi! E-postanızı kontrol edin.');
+            } catch (error) {
+                showError(getErrorMessage(error.code));
+            }
+        }
+    </script>
+</body>
+
+</html>

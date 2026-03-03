@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Profilim — cizgisavaslari.com</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .profile-page {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 24px 16px;
+            min-height: 100vh;
+        }
+
+        .profile-hero {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: var(--radius);
+            padding: 1px;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple), var(--neon-cyan));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .profile-hero .big-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 16px;
+            box-shadow: 0 0 30px rgba(191, 95, 255, 0.4);
+        }
+
+        .profile-hero h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .profile-hero .profile-email {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .profile-hero .level-badge {
+            display: inline-block;
+            padding: 6px 20px;
+            background: linear-gradient(135deg, var(--neon-gold), var(--neon-orange));
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0d0d1a;
+        }
+
+        /* XP Section */
+        .xp-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .xp-section h3 {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Stats */
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.55s ease-out;
+        }
+
+        .p-stat {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .p-stat .p-stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .p-stat .p-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .p-stat .p-stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Achievements in profile */
+        .profile-achievements {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .profile-achievements h3 {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .ach-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .ach-item {
+            padding: 8px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ach-item.earned {
+            border-color: rgba(255, 215, 0, 0.4);
+            color: var(--neon-gold);
+        }
+
+        .ach-item.locked {
+            opacity: 0.4;
+            color: var(--text-muted);
+        }
+
+        /* Actions */
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .upgrade-banner {
+            background: linear-gradient(135deg, rgba(191, 95, 255, 0.15), rgba(0, 240, 255, 0.1));
+            border: 1px solid var(--neon-purple);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.65s ease-out;
+        }
+
+        .upgrade-banner p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-links .btn {
+            flex: 1;
+            text-decoration: none;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="profile-page">
+        <!-- Loading state -->
+        <div id="loadingState" style="text-align:center; padding: 100px 20px;">
+            <div style="font-size:48px; margin-bottom:16px;">⏳</div>
+            <p style="color: var(--text-muted);">Profil yükleniyor...</p>
+        </div>
+
+        <!-- Profile Content (hidden until loaded) -->
+        <div id="profileContent" style="display:none;">
+            <!-- Nav -->
+            <div class="nav-links" style="margin-bottom:20px;">
+                <a href="index.html" class="btn ghost">← Ana Sayfa</a>
+                <a href="leaderboard.html" class="btn ghost">🏆 Sıralama</a>
+            </div>
+
+            <!-- Hero -->
+            <div class="profile-hero">
+                <div class="big-avatar" id="pAvatar">🎮</div>
+                <h2 id="pName">Oyuncu</h2>
+                <div class="profile-email" id="pEmail">—</div>
+                <div class="level-badge" id="pLevelBadge">Seviye 1</div>
+            </div>
+
+            <!-- XP Bar -->
+            <div class="xp-section">
+                <h3>Deneyim Puanı</h3>
+                <div class="xp-bar-container">
+                    <div class="xp-bar-header">
+                        <span id="pXpText">0 / 100 XP</span>
+                        <span id="pXpPercent">0%</span>
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-bar-fill" id="pXpBar" style="width:0%"></div>
+                    </div>
+                </div>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">
+                    Toplam XP: <strong id="pTotalXP">0</strong>
+                </p>
+            </div>
+
+            <!-- Stats -->
+            <div class="profile-stats">
+                <div class="p-stat">
+                    <div class="p-stat-icon">🎮</div>
+                    <div class="p-stat-value" id="pGamesCount">0</div>
+                    <div class="p-stat-label">Oyun Oynandı</div>
+                </div>
+                <div class="p-stat">
+                    <div class="p-stat-icon">🔥</div>
+                    <div class="p-stat-value" id="pStreak">0</div>
+                    <div class="p-stat-label">Gün Serisi</div>
+                </div>
+                <div class="p-stat">
+                    <div class="p-stat-icon">🏆</div>
+                    <div class="p-stat-value" id="pAchCount">0</div>
+                    <div class="p-stat-label">Başarım</div>
+                </div>
+                <div class="p-stat">
+                    <div class="p-stat-icon">📅</div>
+                    <div class="p-stat-value" id="pMemberSince">—</div>
+                    <div class="p-stat-label">Üyelik</div>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="profile-achievements">
+                <h3>🏆 Başarımlar</h3>
+                <div class="ach-list" id="pAchList"></div>
+            </div>
+
+            <!-- Upgrade Banner (for guests) -->
+            <div class="upgrade-banner" id="upgradeBanner" style="display:none;">
+                <p>🔒 Misafir hesabınız geçici! E-posta ile kayıt olarak verilerinizi kalıcı yapın.</p>
+                <button class="btn primary" onclick="location.href='auth.html'">Hesabı Yükselt</button>
+            </div>
+
+            <!-- Actions -->
+            <div class="profile-actions">
+                <button class="btn ghost" id="logoutBtn" onclick="handleLogout()">🚪 Çıkış Yap</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        const ACHIEVEMENTS = [
+            { id: 'first_game', icon: '🎮', name: 'İlk Adım' },
+            { id: '3_day_streak', icon: '🔥', name: '3 Gün Serisi' },
+            { id: 'collector', icon: '⭐', name: 'Koleksiyoncu' },
+            { id: 'veteran', icon: '🏆', name: 'Veteran' },
+            { id: 'legend', icon: '💎', name: 'Efsane' },
+            { id: 'all_categories', icon: '🌈', name: 'Kaşif' }
+        ];
+
+        const avatars = ['🎮', '⚔️', '👑', '🏆', '💎', '🔥', '🌟', '🚀'];
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            const profile = await loadUserProfile();
+            if (!profile) {
+                await initUserInDB();
+                window.location.reload();
+                return;
+            }
+
+            renderProfile(user, profile);
+        });
+
+        function renderProfile(user, data) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('profileContent').style.display = 'block';
+
+            const level = data.level || 1;
+            const xp = data.xp || 0;
+            const totalXP = data.totalXP || 0;
+            const required = level * 100;
+            const percent = Math.round((xp / required) * 100);
+            const avIdx = Math.min(Math.floor(level / 5), avatars.length - 1);
+
+            document.getElementById('pAvatar').textContent = avatars[avIdx];
+            document.getElementById('pName').textContent = data.displayName || 'Oyuncu';
+            document.getElementById('pEmail').textContent = user.isAnonymous ? '👤 Misafir Hesap' : (user.email || '');
+            document.getElementById('pLevelBadge').textContent = 'Seviye ' + level;
+
+            document.getElementById('pXpText').textContent = xp + ' / ' + required + ' XP';
+            document.getElementById('pXpPercent').textContent = percent + '%';
+            document.getElementById('pXpBar').style.width = percent + '%';
+            document.getElementById('pTotalXP').textContent = totalXP;
+
+            const gamesPlayed = data.gamesPlayed || [];
+            document.getElementById('pGamesCount').textContent = gamesPlayed.length;
+            document.getElementById('pStreak').textContent = data.dailyStreak || 0;
+
+            const achievements = data.achievements || [];
+            document.getElementById('pAchCount').textContent = achievements.length;
+
+            // Member since
+            if (data.createdAt) {
+                const d = new Date(data.createdAt);
+                document.getElementById('pMemberSince').textContent = d.toLocaleDateString('tr-TR', { month: 'short', year: 'numeric' });
+            }
+
+            // Achievements
+            const achList = document.getElementById('pAchList');
+            achList.innerHTML = ACHIEVEMENTS.map(a => {
+                const earned = achievements.includes(a.id);
+                return `<div class="ach-item ${earned ? 'earned' : 'locked'}">${earned ? a.icon : '🔒'} ${a.name}</div>`;
+            }).join('');
+
+            // Show upgrade banner for guests
+            if (user.isAnonymous) {
+                document.getElementById('upgradeBanner').style.display = 'block';
+            }
+        }
+
+        async function handleLogout() {
+            await auth.signOut();
+            window.location.href = 'auth.html';
+        }
+    </script>
+</body>
+
+</html>

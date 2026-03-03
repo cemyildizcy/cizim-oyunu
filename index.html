@@ -373,6 +373,13 @@
 					<div class="xp-bar-fill" id="xpBarFill" style="width: 0%"></div>
 				</div>
 			</div>
+			<div style="display:flex; gap:8px; margin-top:12px;">
+				<a href="profile.html" class="small-btn" style="flex:1; text-align:center; text-decoration:none;">👤
+					Profilim</a>
+				<a href="leaderboard.html" class="small-btn" style="flex:1; text-align:center; text-decoration:none;">🏆
+					Sıralama</a>
+				<button class="small-btn" id="logoutBtn" onclick="handleLogout()" style="flex:1;">🚪 Çıkış</button>
+			</div>
 		</div>
 
 		<!-- Stats Grid -->
@@ -587,17 +594,11 @@
 		</footer>
 	</div>
 
-	<!-- Welcome Modal -->
-	<div class="welcome-modal hidden" id="welcomeModal">
-		<div class="welcome-content">
-			<div class="welcome-emoji">🎮</div>
-			<h2>Hoş Geldin!</h2>
-			<p>Oyun koleksiyonuna katıl, seviye atla, başarımlar kazan!</p>
-			<input type="text" class="welcome-input" id="welcomeNameInput" placeholder="Adını yaz..." maxlength="20"
-				autofocus>
-			<button class="btn primary" id="welcomeStartBtn">Başlayalım! 🚀</button>
-		</div>
-	</div>
+	<!-- Firebase SDKs -->
+	<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+	<script src="firebase-config.js"></script>
 
 	<script>
 		// ================================================
@@ -1225,17 +1226,84 @@
 		}
 
 		// ================================================
-		// BOOT
+		// FIREBASE SYNC
 		// ================================================
 
-		(function boot() {
-			const data = getData();
-			if (!data.playerName) {
-				showWelcomeModal();
-			} else {
-				initApp();
+		async function syncToFirebase(data) {
+			if (!isLoggedIn()) return;
+			try {
+				await saveUserProfile({
+					level: data.playerLevel,
+					xp: data.playerXP,
+					totalXP: ((data.playerLevel - 1) * 100) + data.playerXP,
+					gamesPlayed: data.gamesPlayed || [],
+					gameClickCounts: data.gameClickCounts || {},
+					achievements: data.achievements || [],
+					dailyStreak: data.dailyStreak || 0
+				});
+			} catch (e) { console.log('Sync error:', e); }
+		}
+
+		async function loadFromFirebase() {
+			if (!isLoggedIn()) return null;
+			try {
+				const profile = await loadUserProfile();
+				if (profile) {
+					const data = getData();
+					// Merge firebase data into localStorage (firebase wins)
+					data.playerName = profile.displayName || getUserDisplayName();
+					data.playerLevel = profile.level || data.playerLevel || 1;
+					data.playerXP = profile.xp || data.playerXP || 0;
+					data.gamesPlayed = profile.gamesPlayed || data.gamesPlayed || [];
+					data.gameClickCounts = profile.gameClickCounts || data.gameClickCounts || {};
+					data.achievements = profile.achievements || data.achievements || [];
+					data.dailyStreak = profile.dailyStreak || data.dailyStreak || 0;
+					saveData(data);
+					return data;
+				}
+			} catch (e) { console.log('Load error:', e); }
+			return null;
+		}
+
+		// Override addXP to also sync to Firebase
+		const _origAddXP = addXP;
+		addXP = function (amount, reason) {
+			const result = _origAddXP(amount, reason);
+			syncToFirebase(getData());
+			return result;
+		};
+
+		function handleLogout() {
+			auth.signOut().then(() => {
+				localStorage.removeItem('oyunPortalData');
+				window.location.href = 'auth.html';
+			});
+		}
+
+		// ================================================
+		// BOOT (Firebase Auth)
+		// ================================================
+
+		auth.onAuthStateChanged(async (user) => {
+			if (!user) {
+				// Not logged in - redirect to auth
+				window.location.href = 'auth.html';
+				return;
 			}
-		})();
+
+			// Initialize user in DB if needed
+			await initUserInDB();
+
+			// Load from Firebase and merge
+			const fbData = await loadFromFirebase();
+
+			// Set player name from auth
+			let data = getData();
+			data.playerName = getUserDisplayName();
+			saveData(data);
+
+			initApp();
+		});
 	</script>
 
 	<!-- Cookie Consent -->
